@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Biomethane CI Calculator — Free preview — DeCarbon Energy</title>
+<meta name="description" content="Free preview of the Biomethane CI Calculator: an approximate biomethane GHG intensity band. Subscribe for the exact value, detailed calculation and audit-ready report.">
+<style>
+:root{
+  --ink:#1A1A1A; --navy:#13323A; --slate:#46606A; --mute:#7c7c7c; --hair:#E6E6E6;
+  --soft:#F7F7F7; --green:#2E7D55; --greend:#256945; --bg:#FFFFFF; --yellow:#FBF1E3; --yellowb:#E4D2B0;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--ink);font-family:"Helvetica Neue",Arial,"Segoe UI",sans-serif;font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+a{color:inherit;text-decoration:none;}
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px;}
+img{max-width:100%;}
+.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--hair);}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;}
+.nav .logo{height:28px;}
+.nav .links{display:flex;align-items:center;gap:20px;font-size:13.5px;font-weight:600;}
+.nav .links a.muted{color:var(--slate);}
+.btn{display:inline-block;border-radius:5px;font-weight:700;cursor:pointer;border:0;}
+.btn-green{background:var(--green);color:#fff;padding:10px 18px;font-size:13.5px;}
+.btn-green:hover{background:var(--greend);}
+.btn-dark{background:var(--navy);color:#fff;padding:11px 20px;font-size:14px;}
+.btn-ghost{background:#fff;color:var(--navy);border:1.5px solid var(--hair);padding:10px 18px;font-size:14px;}
+
+.head{background:linear-gradient(180deg,#fff,#F4F7F6);border-bottom:1px solid var(--hair);}
+.head .wrap{padding:34px 22px 26px;}
+.kicker{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--green);font-weight:700;}
+.head h1{font-size:30px;font-weight:800;letter-spacing:-.01em;margin:8px 0 6px;}
+.head p{font-size:14.5px;color:var(--slate);max-width:680px;}
+
+.grid{display:grid;grid-template-columns:1fr 360px;gap:26px;align-items:start;padding:30px 0 60px;}
+@media(max-width:880px){.grid{grid-template-columns:1fr;}}
+
+h2.sec{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink);background:var(--soft);
+  padding:9px 13px;margin:0 0 0;border:1px solid var(--hair);border-bottom:2px solid var(--navy);border-radius:2px 2px 0 0;}
+.card{background:#fff;border:1px solid var(--hair);border-top:none;border-radius:0 0 2px 2px;padding:16px 15px;}
+.settings{display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;margin-bottom:22px;}
+label.fld{display:block;font-size:12px;}
+label.fld .lab{display:block;font-weight:600;margin-bottom:4px;}
+select{width:100%;padding:9px 10px;font-size:14px;font-weight:600;background:var(--yellow);border:1px solid var(--yellowb);border-radius:3px;}
+
+table{border-collapse:collapse;width:100%;font-size:13px;table-layout:fixed;}
+thead th{font-size:10px;text-transform:uppercase;letter-spacing:.02em;color:#fff;background:var(--navy);font-weight:600;text-align:left;padding:8px 8px;}
+thead th.num{text-align:right;}
+tbody td{padding:5px 8px;border-bottom:1px solid var(--hair);vertical-align:middle;}
+td.nm{font-weight:600;color:var(--ink);}
+tbody input{width:100%;padding:7px 8px;text-align:right;font-size:13px;font-weight:600;background:var(--yellow);border:1px solid var(--yellowb);border-radius:3px;}
+col.cn{width:70%} col.cv{width:30%}
+.hint{font-size:11.5px;color:var(--mute);font-style:italic;margin:0 0 10px;}
+
+.side{position:sticky;top:78px;}
+.bandbox{background:var(--navy);color:#fff;border-radius:8px;padding:22px 20px;text-align:center;}
+.bandbox .bl{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#9fb8bf;}
+.bandbox .bv{font-size:34px;font-weight:800;line-height:1.1;margin:6px 0 2px;}
+.bandbox .bu{font-size:11.5px;color:#9fb8bf;}
+.bandbox .approx{display:inline-block;margin-top:10px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#cfe3d8;border:1px solid #2f5a64;border-radius:20px;padding:3px 10px;}
+.saverow{display:flex;gap:10px;margin-top:12px;}
+.saverow .mini{flex:1;background:var(--soft);border:1px solid var(--hair);border-radius:6px;padding:10px;text-align:center;}
+.saverow .mini .v{font-size:18px;font-weight:800;color:var(--green);}
+.saverow .mini .l{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute);}
+
+.locked{margin-top:14px;border:1px solid var(--yellowb);background:var(--yellow);border-radius:8px;padding:16px;}
+.locked h3{font-size:13.5px;font-weight:800;color:#7a4a16;margin-bottom:8px;}
+.locked ul{list-style:none;font-size:12.5px;color:#7a4a16;margin-bottom:14px;}
+.locked li{padding:4px 0 4px 22px;position:relative;}
+.locked li:before{content:"🔒";position:absolute;left:0;font-size:11px;}
+.locked .btn{width:100%;text-align:center;margin-bottom:8px;}
+.disc{margin-top:18px;font-size:11px;color:var(--mute);font-style:italic;}
+
+footer{background:#000;color:#c9d2d6;margin-top:10px;}
+footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:24px 22px;}
+footer .logochip{display:inline-block;background:#fff;padding:7px 10px;border-radius:7px;}
+footer .logochip img{height:22px;display:block;}
+footer .fl{font-size:12px;color:#9fb1b7;}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="wrap">
+    <a href="index.html"><img class="logo" src="https://cdn.prod.website-files.com/68bd30984b2e2994dfa84953/6a216bcfa4f8e4b053f9f3d0_logo%20al%C3%A1%C3%ADr%C3%A1shoz.png" alt="DeCarbon Energy"></a>
+    <div class="links">
+      <a class="muted" href="index.html#how">How it works</a>
+      <a class="muted" href="index.html#pricing">Pricing</a>
+      <a class="btn btn-green" href="index.html#pricing">Sign up</a>
+    </div>
+  </div>
+</nav>
+
+<header class="head">
+  <div class="wrap">
+    <div class="kicker">Free preview · no sign-up</div>
+    <h1>Estimate your biomethane carbon-intensity band</h1>
+    <p>Enter a few feedstocks to see an approximate carbon intensity (CI) band. For the exact value, the detailed RED III Annex VI calculation and the audit-ready report, subscribe to the full calculator.</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+    <div>
+      <div class="settings">
+        <label class="fld"><span class="lab">Electricity you use</span>
+          <select id="pelec"><option value="grid" selected>Grid electricity</option><option value="renewable">Renewable / on-site (solar, wind, PPA/GO)</option></select></label>
+        <label class="fld"><span class="lab">Digestate storage</span>
+          <select id="pdig"><option value="closed">closed</option><option value="open">open</option></select></label>
+      </div>
+      <h2 class="sec">Feedstocks — enter yearly tonnage</h2>
+      <div class="card">
+        <div class="hint">A short list of common substrates. The full calculator has all 162.</div>
+        <table>
+          <colgroup><col class="cn"><col class="cv"></colgroup>
+          <thead><tr><th>Substrate</th><th class="num">t / yr</th></tr></thead>
+          <tbody id="pbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="side">
+      <div class="bandbox">
+        <div class="bl">Approx. carbon intensity</div>
+        <div class="bv" id="band">—</div>
+        <div class="bu">g CO₂eq / MJ</div>
+        <div class="approx">approximate band</div>
+        <div class="saverow">
+          <div class="mini"><div class="v" id="bandsave">—</div><div class="l">GHG saving</div></div>
+          <div class="mini"><div class="v" id="bandgwh">—</div><div class="l">biomethane</div></div>
+        </div>
+      </div>
+      <div class="locked">
+        <h3>Unlock the full calculator</h3>
+        <ul>
+          <li>The exact gCO₂eq/MJ value</li>
+          <li>All 162 feedstocks &amp; full inputs</li>
+          <li>Itemized RED III Annex VI calculation</li>
+          <li>Audit-ready PDF report + offtake value</li>
+        </ul>
+        <a class="btn btn-dark" href="index.html#pricing">Sign up — from €100/mo</a>
+        <a class="btn btn-ghost" href="index.html#how">See how it works</a>
+      </div>
+      <div class="disc">Approximate, indicative only. Not a substitute for the ISCC EU audit. Property of DeCarbon Energy Kft.</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span class="logochip"><img src="https://cdn.prod.website-files.com/68bd30984b2e2994dfa84953/6a216bcfa4f8e4b053f9f3d0_logo%20al%C3%A1%C3%ADr%C3%A1shoz.png" alt="DeCarbon Energy"></span>
+    <span class="fl">© DeCarbon Energy Kft. · Biomethane CI Calculator · free preview · not a substitute for the ISCC EU audit</span>
+  </div>
+</footer>
+
+<script>
+const DB = [{"en":"Baking residues","hu":"Sütési hulladék","cat":"Bakery byproducts","bg":434,"pct":0.53,"ch4":230,"ts":87},{"en":"Old bread","hu":"Száraz kenyér","cat":"Bakery byproducts","bg":434,"pct":0.53,"ch4":230,"ts":87},{"en":"Sorted out dry pasta","hu":"Selejt száraztészta","cat":"Bakery byproducts","bg":472,"pct":0.53,"ch4":250,"ts":90},{"en":"Cannery waste water sludge","hu":"Konzervipari 1. és 2. iszap","cat":"Vegetable byproducts","bg":23,"pct":0.53,"ch4":12,"ts":3},{"en":"Grass fiber residues from the production of grass protein","hu":"Fűfehérje termeléséből származó fűrost-maradványok","cat":"Vegetable byproducts","bg":170,"pct":0.53,"ch4":90,"ts":35},{"en":"Hevea seed","hu":"Kaucsukfa mag","cat":"Vegetable byproducts","bg":0,"pct":0.53,"ch4":0,"ts":0},{"en":"Maize husk","hu":"Kukorica Csuhé konzervipari melléktermék","cat":"Vegetable byproducts","bg":283,"pct":0.53,"ch4":150,"ts":88},{"en":"Potato peelings","hu":"Burgonyahéj","cat":"Vegetable byproducts","bg":142,"pct":0.53,"ch4":75,"ts":20},{"en":"Potato process water from starch production","hu":"Keményítőgyártásból származó burgonya kezelővize","cat":"Vegetable byproducts","bg":142,"pct":0.53,"ch4":75,"ts":20},{"en":"Potato pulp from Starke production","hu":"Burgonyapép a keményítőgyártásból","cat":"Vegetable byproducts","bg":142,"pct":0.53,"ch4":75,"ts":20},{"en":"Potatoes","hu":"Burgonya","cat":"Vegetable byproducts","bg":142,"pct":0.53,"ch4":75,"ts":20},{"en":"Toxicated/polluted wet maise fiber (up to 60% water content). (originally intended for life stock feeding)","hu":"Nedves kukoricarost (PWF,CGF,WDGS stb.)","cat":"Vegetable byproducts","bg":23,"pct":0.53,"ch4":12,"ts":3},{"en":"Vegetable scraps","hu":"Zöldséghulladékok","cat":"Vegetable byproducts","bg":109,"pct":0.53,"ch4":58,"ts":12},{"en":"Vegetables (sorted out)","hu":"Zöldségek (kiválogatva)","cat":"Vegetable byproducts","bg":109,"pct":0.53,"ch4":58,"ts":12},{"en":"Alcoholic sludge from ISO sugar production","hu":"Sűrűszeszmoslék (bioetanol melléktermék)","cat":"Distillery byproducts","bg":145,"pct":0.55,"ch4":80,"ts":20},{"en":"Brewer's grains","hu":"Söripari gabona maradék","cat":"Distillery byproducts","bg":418,"pct":0.55,"ch4":230,"ts":87},{"en":"Corn cleaning residue","hu":"Kukorica tisztítási maradék (bioetanol melléktermék)","cat":"Distillery byproducts","bg":145,"pct":0.55,"ch4":80,"ts":20},{"en":"DDGS (distillers dried grains)","hu":"DDGS (szárított gabonamoslék)","cat":"Distillery byproducts","bg":418,"pct":0.55,"ch4":230,"ts":88},{"en":"Fruit pomace and grape pomace (fresh/untreated)","hu":"Szőlőtörköly és borseprő (friss/kezeletlen)","cat":"Distillery byproducts","bg":118,"pct":0.55,"ch4":65,"ts":40},{"en":"Fruit pulp","hu":"Gyümölcstörköly","cat":"Distillery byproducts","bg":145,"pct":0.55,"ch4":80,"ts":20},{"en":"Fusel oils from alcoholic distillation","hu":"Alkoholos desztillációból származó kozmaolajok","cat":"Distillery byproducts","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Grain stillage from alcohol production","hu":"Alkoholgyártásból származó szeszmoslék < 10% TS","cat":"Distillery byproducts","bg":418,"pct":0.55,"ch4":230,"ts":87},{"en":"Maize syrup (final product, bioethanol)","hu":"Kukoricaszirup (bioetanol melléketermék)","cat":"Distillery byproducts","bg":882,"pct":0.68,"ch4":600,"ts":95},{"en":"Pot ale (Liquid remaining after the distillation of grain in the manufacture of whisky)","hu":"A whiskygyártás során a gabona lepárlása után visszamaradó folyadék","cat":"Distillery byproducts","bg":418,"pct":0.55,"ch4":230,"ts":87},{"en":"Potato stillage from alcohol production","hu":"Alkoholgyártásból származó burgonyahéj","cat":"Distillery byproducts","bg":136,"pct":0.55,"ch4":75,"ts":20},{"en":"Stillage from alcohol production (fruit origin)","hu":"Cefremoslék (gyümölcs alapú)","cat":"Distillery byproducts","bg":45,"pct":0.55,"ch4":25,"ts":6},{"en":"Technical corn oil from distillers grain","hu":"Lepárlásból származó technikai kukoricaplai","cat":"Distillery byproducts","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Transesterification residues","hu":"Átészterezési maradékok","cat":"Distillery byproducts","bg":145,"pct":0.55,"ch4":80,"ts":20},{"en":"Vinasse (sugar/alcohol)","hu":"Vinasz (cukor/szeszipari moslék)","cat":"Distillery byproducts","bg":64,"pct":0.55,"ch4":35,"ts":8},{"en":"WDGS, Corn fibre (bioethanol byproduct)","hu":"WDGS, Kukoricarost (bioetanol melléktermék)","cat":"Distillery byproducts","bg":882,"pct":0.68,"ch4":600,"ts":95},{"en":"Waste from non-alcoholic beer production","hu":"Alkoholmentes sörgyártásból származó hulladék","cat":"Distillery byproducts","bg":145,"pct":0.55,"ch4":80,"ts":20},{"en":"Waste slurry from the distillation of grain mixtures","hu":"Gabona keverékek desztillációjából származó hulladék iszap","cat":"Distillery byproducts","bg":33,"pct":0.55,"ch4":18,"ts":8},{"en":"Food waste","hu":"Élelmiszer-hulladék (moslék)","cat":"Food industry byproducts","bg":193,"pct":0.57,"ch4":110,"ts":25},{"en":"Olive pomace / olive mill waste","hu":"Olajbogyó-törköly","cat":"Food industry byproducts","bg":164,"pct":0.55,"ch4":90,"ts":40},{"en":"Pet food residue material (not qualified for use)","hu":"Kisállat takarmány maradék (petfood)","cat":"Food industry byproducts","bg":211,"pct":0.57,"ch4":120,"ts":30},{"en":"Petfood sorted-out","hu":"Selejt állateledel","cat":"Food industry byproducts","bg":211,"pct":0.57,"ch4":120,"ts":30},{"en":"Pressed sugar beet pulp","hu":"Préselt répaszelet","cat":"Food industry byproducts","bg":142,"pct":0.53,"ch4":75,"ts":24},{"en":"Wastefood material for animal livestock (meat origin)","hu":"Élelmiszeripari melléktermék (hús eredet)","cat":"Food industry byproducts","bg":211,"pct":0.57,"ch4":120,"ts":30},{"en":"Buttermilk fresh","hu":"Friss író","cat":"Dairy byproducts","bg":61,"pct":0.57,"ch4":35,"ts":12},{"en":"Casein, dry","hu":"Kasein száraz","cat":"Dairy byproducts","bg":105,"pct":0.57,"ch4":60,"ts":15},{"en":"Milk","hu":"Tej","cat":"Dairy byproducts","bg":61,"pct":0.57,"ch4":35,"ts":12},{"en":"Milk sludge","hu":"Tejipari szennyvíziszapok","cat":"Dairy byproducts","bg":61,"pct":0.57,"ch4":35,"ts":12},{"en":"Milk whey, fresh (20%)","hu":"Savó friss 20%","cat":"Dairy byproducts","bg":105,"pct":0.57,"ch4":60,"ts":15},{"en":"Milk whey, fresh (5% TS)","hu":"Savó friss 5 % TS","cat":"Dairy byproducts","bg":105,"pct":0.57,"ch4":60,"ts":15},{"en":"Milk whey, thickened (90% TS)","hu":"Tejsavó, konzerv  90% TS","cat":"Dairy byproducts","bg":105,"pct":0.57,"ch4":60,"ts":15},{"en":"Other dairy by-product","hu":"Egyéb tejipari melléktermék","cat":"Dairy byproducts","bg":105,"pct":0.57,"ch4":60,"ts":15},{"en":"Quark","hu":"Túró","cat":"Dairy byproducts","bg":105,"pct":0.57,"ch4":60,"ts":15},{"en":"Sour milk whey, fresh (<10%)","hu":"Savanyú savó frissen (<10%)","cat":"Dairy byproducts","bg":105,"pct":0.57,"ch4":60,"ts":15},{"en":"Sour whey, thickened (>10%)","hu":"Savanyú tejsavó besűrítve (10%<)","cat":"Dairy byproducts","bg":105,"pct":0.57,"ch4":60,"ts":15},{"en":"Waste oil from sewage sludge treatment","hu":"Szennyvíziszap kezeléséből származó fáradt olaj","cat":"Dairy byproducts","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Beet head & tail particles","hu":"Cukor Répa törmelék","cat":"Confectionery byproducts","bg":109,"pct":0.55,"ch4":60,"ts":20},{"en":"Molasses (sugar industry byproduct)","hu":"Melasz (Cukoripari melléktermék)","cat":"Confectionery byproducts","bg":545,"pct":0.55,"ch4":300,"ts":75},{"en":"Sugar beet betaine residue","hu":"cukorrépa betain maradék","cat":"Confectionery byproducts","bg":109,"pct":0.55,"ch4":60,"ts":20},{"en":"Sugar beet pulp","hu":"Cukorrépa préselt szelet (Cukoripari melléktermék)","cat":"Confectionery byproducts","bg":109,"pct":0.55,"ch4":60,"ts":20},{"en":"Bagasse","hu":"Kipréselt cukornád","cat":"Manufacturing industry byproducts","bg":283,"pct":0.6,"ch4":170,"ts":50},{"en":"Biofilter material","hu":"Biofilter","cat":"Manufacturing industry byproducts","bg":500,"pct":0.6,"ch4":300,"ts":85},{"en":"Brown grease","hu":"Barna zsír/zsírfogó zsír","cat":"Manufacturing industry byproducts","bg":1029,"pct":0.68,"ch4":700,"ts":95},{"en":"Brown liquor / spent sulphite liquor","hu":"Barnalúg / kiégett szulfitlúg","cat":"Manufacturing industry byproducts","bg":500,"pct":0.6,"ch4":300,"ts":85},{"en":"Cashew nut shell liquid (CNSL)","hu":"Kesudióhéj folyadék (CNSL)","cat":"Manufacturing industry byproducts","bg":0,"pct":0.6,"ch4":0,"ts":0},{"en":"Champost","hu":"Letermett gombakomposzt","cat":"Manufacturing industry byproducts","bg":500,"pct":0.6,"ch4":300,"ts":85},{"en":"Crude vegetable oil sediment","hu":"Növényi Olaj üledék/Viterra","cat":"Manufacturing industry byproducts","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Empty Palm Fruit Bunch (EFB)","hu":"Pálmatermés üres héja","cat":"Manufacturing industry byproducts","bg":500,"pct":0.6,"ch4":300,"ts":85},{"en":"Empty Palm Fruit Bunch (EFB) oil","hu":"Pálmaolajprés effluense","cat":"Manufacturing industry byproducts","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"FFA (free fatty acids)","hu":"FFA (szabad zsírsavak)","cat":"Manufacturing industry byproducts","bg":1029,"pct":0.68,"ch4":700,"ts":95},{"en":"Fat separator contents","hu":"Zsírszeparátor tartalma < 10% TS","cat":"Manufacturing industry byproducts","bg":1029,"pct":0.68,"ch4":700,"ts":95},{"en":"Flotate fats","hu":"Flotált zsírok","cat":"Manufacturing industry byproducts","bg":1029,"pct":0.68,"ch4":700,"ts":95},{"en":"Flotate sludge","hu":"Flotát iszap","cat":"Manufacturing industry byproducts","bg":50,"pct":0.6,"ch4":30,"ts":8},{"en":"Frying fats (category1)","hu":"Sütőzsírok (Kategória1)","cat":"Manufacturing industry byproducts","bg":1029,"pct":0.68,"ch4":700,"ts":95},{"en":"Frying fats (category2)","hu":"Sütőzsírok (Kategória2)","cat":"Manufacturing industry byproducts","bg":1029,"pct":0.68,"ch4":700,"ts":95},{"en":"Husk and shell","hu":"Háncs és héj","cat":"Manufacturing industry byproducts","bg":250,"pct":0.6,"ch4":150,"ts":88},{"en":"Lecithin, oil processing bottom tank residue after cleaning with water","hu":"Olajos tartályalj, lecitin","cat":"Manufacturing industry byproducts","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Palm oil mill effluent (POME) oil","hu":"Pálmaolaj malom effluent (POME)","cat":"Manufacturing industry byproducts","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Rapeseed meal","hu":"Repcemagliszt","cat":"Manufacturing industry byproducts","bg":383,"pct":0.6,"ch4":230,"ts":88},{"en":"Rapeseed residue (double counting)","hu":"repcemaradvány (kettős beszámítás)","cat":"Manufacturing industry byproducts","bg":383,"pct":0.6,"ch4":230,"ts":88},{"en":"Rapeseed residue (single counting)","hu":"repcemaradvány (egyszeres beszámítás)","cat":"Manufacturing industry byproducts","bg":383,"pct":0.6,"ch4":230,"ts":88},{"en":"Shells of nuts","hu":"Diófélék héja","cat":"Manufacturing industry byproducts","bg":500,"pct":0.6,"ch4":300,"ts":85},{"en":"Sunflower filtered waste material (liquid)","hu":"Nyálka","cat":"Manufacturing industry byproducts","bg":125,"pct":0.6,"ch4":75,"ts":25},{"en":"Used cooking oil sediment","hu":"Használt sütőolaj salak","cat":"Manufacturing industry byproducts","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Vegetable oil filter processing residue","hu":"Növényi olaj feldolg. szűrési maradék (Winteriszap derítőföld)","cat":"Manufacturing industry byproducts","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Rapeseed cake","hu":"Repcepogácsa","cat":"Manufacturing industry byproducts","bg":383,"pct":0.6,"ch4":230,"ts":88},{"en":"Animal blood","hu":"Állati vér","cat":"Slaughterhouse & meat processing byproducts","bg":97,"pct":0.62,"ch4":60,"ts":18},{"en":"Canning by-products","hu":"Konzervipari melléktermékek","cat":"Slaughterhouse & meat processing byproducts","bg":290,"pct":0.62,"ch4":180,"ts":35},{"en":"Fats of animal origin - classified in categories 1 and 2 in accordance with Regulation 1069/2009/EC","hu":"Állati eredetű zsírok - az 1069/2009/EK rendelettel összhangban az 1. és 2. kategóriába sorolt","cat":"Slaughterhouse & meat processing byproducts","bg":1029,"pct":0.68,"ch4":700,"ts":95},{"en":"Glycerine","hu":"Nyers glicerin","cat":"Slaughterhouse & meat processing byproducts","bg":290,"pct":0.62,"ch4":180,"ts":35},{"en":"Impurities recovered from crude glycerol during the refining process (MONG)","hu":"A nyers glicerinből a finomítási folyamat során visszanyert szennyeződések (MONG)","cat":"Slaughterhouse & meat processing byproducts","bg":565,"pct":0.62,"ch4":350,"ts":90},{"en":"Other meat industry by-products","hu":"Egyéb húsipari melléktermékek","cat":"Slaughterhouse & meat processing byproducts","bg":290,"pct":0.62,"ch4":180,"ts":35},{"en":"Other processing-industry by-products","hu":"Egyéb feldolgozóipari melléktermékek","cat":"Slaughterhouse & meat processing byproducts","bg":290,"pct":0.62,"ch4":180,"ts":35},{"en":"Poultry feather acid oil","hu":"Baromfi tollsavas olaj","cat":"Slaughterhouse & meat processing byproducts","bg":129,"pct":0.62,"ch4":80,"ts":40},{"en":"Refrigeration by-products","hu":"Hűtőipari melléktermékek","cat":"Slaughterhouse & meat processing byproducts","bg":290,"pct":0.62,"ch4":180,"ts":35},{"en":"Rumen contents","hu":"Bendő tartalma","cat":"Slaughterhouse & meat processing byproducts","bg":89,"pct":0.62,"ch4":55,"ts":15},{"en":"Sterilised slaughterhouse waste material","hu":"Sterilizált vágóhídi melléktermék","cat":"Slaughterhouse & meat processing byproducts","bg":290,"pct":0.62,"ch4":180,"ts":35},{"en":"Stomach contents (pig)","hu":"Gyomortartalom (sertés)","cat":"Slaughterhouse & meat processing byproducts","bg":97,"pct":0.62,"ch4":60,"ts":25},{"en":"Stomach milk fresh (no longer suitable for consumption)","hu":"Gyomortej frissen (fogyasztásra már nem alkalmas)","cat":"Slaughterhouse & meat processing byproducts","bg":56,"pct":0.62,"ch4":35,"ts":12},{"en":"Cattle slurry","hu":"Szarvasmarha almos / hígtrágya","cat":"Animal manure","bg":20,"pct":0.55,"ch4":11,"ts":8},{"en":"Pig slurry","hu":"Sertés hígtrágya","cat":"Animal manure","bg":16,"pct":0.55,"ch4":9,"ts":8},{"en":"Poultry slurry","hu":"Baromfi hígtrágya","cat":"Animal manure","bg":33,"pct":0.55,"ch4":18,"ts":8},{"en":"Solid cattle manure","hu":"Szilárd marhatrágya","cat":"Animal manure","bg":55,"pct":0.55,"ch4":30,"ts":18},{"en":"Solid horse manure","hu":"Lótrágya","cat":"Animal manure","bg":51,"pct":0.55,"ch4":28,"ts":18},{"en":"Solid pig manure","hu":"Szilárd sertéstrágya","cat":"Animal manure","bg":62,"pct":0.55,"ch4":34,"ts":18},{"en":"Solid poultry manure","hu":"Baromfi száraz trágya","cat":"Animal manure","bg":91,"pct":0.55,"ch4":50,"ts":18},{"en":"Solid rabbit manure","hu":"Nyúl száraz trágya","cat":"Animal manure","bg":73,"pct":0.55,"ch4":40,"ts":18},{"en":"Solid sheep and goat manure","hu":"Juh- és kecsketrágya","cat":"Animal manure","bg":58,"pct":0.55,"ch4":32,"ts":18},{"en":"Solid turkey manure","hu":"Pulykatrágya","cat":"Animal manure","bg":91,"pct":0.55,"ch4":50,"ts":18},{"en":"Algae grown on land in ponds or photobioreactors","hu":"Földterületen tavakban vagy fotobioreaktorban termesztett algák","cat":"Green waste","bg":283,"pct":0.53,"ch4":150,"ts":20},{"en":"City park grass","hu":"Városi zöldhulladék, fű","cat":"Green waste","bg":170,"pct":0.53,"ch4":90,"ts":35},{"en":"Cut flowers","hu":"Vágott virágok","cat":"Green waste","bg":142,"pct":0.53,"ch4":75,"ts":25},{"en":"Flower strips, flower meadows, nature reserves, field margins, Sage thistle meadows","hu":"Mezei virágok","cat":"Green waste","bg":142,"pct":0.53,"ch4":75,"ts":25},{"en":"Green waste from garden and park maintenance","hu":"Kert- és parkfenntartásból származó zöldhulladék","cat":"Green waste","bg":170,"pct":0.53,"ch4":90,"ts":35},{"en":"Landscape mowing material, including turf grass","hu":"Tájképi kaszálási anyag, beleértve a gyepfűvet is","cat":"Green waste","bg":170,"pct":0.53,"ch4":90,"ts":35},{"en":"Medicinal and spice plants","hu":"Gyógy- és fűszernövények","cat":"Green waste","bg":151,"pct":0.53,"ch4":80,"ts":35},{"en":"Organic municipal solid waste (biomass portion only)","hu":"Szerves települési zöldhulladék","cat":"Green waste","bg":151,"pct":0.53,"ch4":80,"ts":35},{"en":"Raw methanol from kraft pulping stemming from the production of wood pulp","hu":"Fapépgyártásból származó nátroncellulóz-gyártásból származó nyers metanol","cat":"Green waste","bg":735,"pct":0.68,"ch4":500,"ts":90},{"en":"Waste wood","hu":"Fakéreg, ágak, hulladékfa, levelek, fűrészpor, faforgács","cat":"Green waste","bg":0,"pct":0.53,"ch4":0,"ts":60},{"en":"Biogenic fraction of end-of-life tyres","hu":"Az elhasználódott gumiabroncsok biogén frakciója","cat":"Other","bg":0,"pct":0.55,"ch4":0,"ts":30},{"en":"Dextrose hydrolysate","hu":"Dextróz hidrolizátum","cat":"Other","bg":182,"pct":0.55,"ch4":100,"ts":30},{"en":"Ethanol used in the cleaning/extraction of blood plasma","hu":"A vérplazma tisztításához/kivonásához használt etanol","cat":"Other","bg":109,"pct":0.55,"ch4":60,"ts":18},{"en":"Ethanol used in the extraction of ingredients from medicinal plants","hu":"Gyógynövényekből összetevők kivonásához használt etanol","cat":"Other","bg":882,"pct":0.68,"ch4":600,"ts":95},{"en":"Municipal Solid Waste (MSW)","hu":"Települési szilárd szerves hulladék (MOHU begyűjtés)","cat":"Other","bg":182,"pct":0.55,"ch4":100,"ts":35},{"en":"Municipal wastewater and derivatives other than sewage sludge","hu":"Települési szennyvíz és származékai a szennyvíziszap kivételével","cat":"Other","bg":22,"pct":0.55,"ch4":12,"ts":3},{"en":"Organic waste and similar waste flows from trade, services and companies (bio-waste from trade, services and companies)","hu":"A kereskedelemből, szolgáltatásokból és cégekből származó szerves hulladék és hasonló hulladék (biohulladék a kereskedelemből, a szolgáltatásokból és a vállalatokból)","cat":"Other","bg":182,"pct":0.55,"ch4":100,"ts":28},{"en":"Out-of-shelf-life disinfectant","hu":"Lejárt a szavatossági idejű fertőtlenítőszer","cat":"Other","bg":0,"pct":0.55,"ch4":0,"ts":0},{"en":"Residual lignocellulosic material","hu":"Lignocellulózos maradék","cat":"Other","bg":231,"pct":0.52,"ch4":120,"ts":60},{"en":"Residue of FAME final distillation","hu":"A FAME végdesztillációjának maradéka","cat":"Other","bg":182,"pct":0.55,"ch4":100,"ts":30},{"en":"Sewage sludge","hu":"Szennyvíziszap","cat":"Other","bg":20,"pct":0.6,"ch4":12,"ts":5},{"en":"Soapstock acid oil contaminated with sulphur","hu":"Kénnel szennyezett szappansav olaj","cat":"Other","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Spent bleaching earth","hu":"Elhasznált fehérítőföld","cat":"Other","bg":182,"pct":0.55,"ch4":100,"ts":30},{"en":"Spent bleaching earth oil (SBEO)","hu":"Elhasznált fehérítőföld olaj","cat":"Other","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Tall oil","hu":"Tallolaj","cat":"Other","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Tall oil pitch","hu":"Tallolajszurok","cat":"Other","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Unrefined liquid dextrose ultrafiltrationretentate","hu":"Finomítatlan folyékony dextróz ultraszűrő retentátum","cat":"Other","bg":182,"pct":0.55,"ch4":100,"ts":30},{"en":"Waste starch slurry","hu":"Hulladék keményítőiszap","cat":"Other","bg":33,"pct":0.55,"ch4":18,"ts":8},{"en":"Wastewater from ship transport","hu":"Hajószállítás szennyvizei","cat":"Other","bg":22,"pct":0.55,"ch4":12,"ts":3},{"en":"Wastewater from the food industry","hu":"Élelmiszeriparipar szennyvizei","cat":"Other","bg":22,"pct":0.55,"ch4":12,"ts":3},{"en":"Wastewater from the paper- and cardboard industry","hu":"Papír- és kartonipar szennyvizei","cat":"Other","bg":22,"pct":0.55,"ch4":12,"ts":3},{"en":"Barley husk","hu":"Árpahéj","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":88},{"en":"Beet leaves with beet ingredients","hu":"Cukorrépalevél cukorrépa összetevőkkel","cat":"Feed waste","bg":113,"pct":0.53,"ch4":60,"ts":20},{"en":"Bran","hu":"Korpa","cat":"Feed waste","bg":453,"pct":0.53,"ch4":240,"ts":87},{"en":"By-products of fruit cultivation","hu":"Gyümölcstermesztés melléktermékei","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"By-products of vegetable cultivation","hu":"Zöldségtermesztés melléktermékei","cat":"Feed waste","bg":109,"pct":0.53,"ch4":58,"ts":12},{"en":"Corn cob mix","hu":"Lemorzsolt kukoricacső","cat":"Feed waste","bg":434,"pct":0.53,"ch4":230,"ts":55},{"en":"Corn kernels (if too dry bacterias cant process)","hu":"Kukorica törtszem","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Corn silage","hu":"Kukoricaszilázs","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Corn stalk","hu":"Kukoricaszár","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Crops grown on severely degraded land excluding food and feed crops and feedstocks listed in Part A of this Annex, where not used for the production of biofuel for the aviation sector","hu":"Súlyosan leromlott talajon termesztett növények, kivéve az élelmiszer- és takarmánynövényeket és az e Annex IX A. részében felsorolt alapanyagok, ha nem használják fel bioüzemanyag a repülési ágazat számára","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Crops grown on severely degraded land, except food and feed crops, where used for the production of biofuel for the aviation sector;","hu":"Súlyosan leromlott területeken termesztett növények, kivéve az élelmiszer- és takarmánynövények, amelyeket a légiközlekedési ágazat számára bioüzemanyag előállítására használnak fel","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Cyanobacteria","hu":"Cianobaktériumok","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Damaged crops that are not fit for use in the food or feed chain, excluding substances that have been intentionally modified or contaminated in order to meet this definition","hu":"Az élelmiszer- vagy takarmányláncban való felhasználásra alkalmatlan, sérült növények, kivéve olyan anyagok, amelyeket szándékosan módosítottak vagy szennyeztek annak érdekében, hogy megfeleljenek ennek a meghatározásnak","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Fodder beet leaves","hu":"","cat":"Feed waste","bg":113,"pct":0.53,"ch4":60,"ts":20},{"en":"Grain dust","hu":"Gabona léha","cat":"Feed waste","bg":434,"pct":0.53,"ch4":230,"ts":87},{"en":"Grain waste","hu":"Gabonahulladék","cat":"Feed waste","bg":434,"pct":0.53,"ch4":230,"ts":87},{"en":"Intermediate crops, such as catch crops and cover crops that are grown in areas where due to a short vegetation period the production of food and feed crops is limited to one harvest and provided their use does not trigger demand for additional land, and provided the soil organic matter content is maintained, where used for the production of biofuel for the aviation sector;","hu":"Olyan köztes termények, amelyeket olyan területen termesztenek, ahol a rövid vegetációs időszak miatt az élelmiszer- és takarmánynövények termesztése egy betakarításra korlátozódik, és felhasználásuk nem vált ki további földigényt, és a talaj szervesanyag-tartalma megmarad, illetve a légiközlekedési ágazat számára bioüzemanyag előállítására használják","cat":"Feed waste","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Intermediate crops, such as catch crops and cover crops, and excluding feedstocks listed in Part A of this Annex, that are grown in areas where due to a short vegetation period the production of food and feed crops is limited to one harvest and provided their use does not trigger demand for additional land and provided the soil organic matter content is maintained, where not used for the production of biofuel for the aviation sector","hu":"Olyan köztes termények, kivéve az Annex IX A. részében felsorolt alapanyagok, amelyeket olyan területeken termesztenek, ahol rövid vegetációs időszak az élelmiszer-és takarmánynövények termelése egy betakarításra korlátozódik, és feltéve, hogy használatuk nem vált ki további földigényt, és a talaj szervesanyag- tartalma megmarad, és nem használják fel bioüzemanyag előállítására a légiközlekedési ágazatban","cat":"Feed waste","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Lawn hay","hu":"Fűszenázs","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Other by-product from arable land","hu":"Egyéb melléktermék szántóföldről","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Other cultivated plant","hu":"Egyéb termesztett növény","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Other mill industry by-product","hu":"Egyéb malomipari melléktermék","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Other silage, hay","hu":"Egyéb szilázs, szenázs","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Sorghum silage","hu":"Cirokszilázs","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Soybean","hu":"Szójabab","cat":"Feed waste","bg":566,"pct":0.53,"ch4":300,"ts":88},{"en":"Straw","hu":"Szalma","cat":"Feed waste","bg":340,"pct":0.53,"ch4":180,"ts":86},{"en":"Sunflower husk grain","hu":"Napraforgó maghéj, dara","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":88},{"en":"Water-rich stream originating from the processing of soybeans (velasse)","hu":"A szójabab feldolgozásából származó vízben gazdag anyag (velase)","cat":"Feed waste","bg":23,"pct":0.53,"ch4":12,"ts":3}];
+// RED III Annex VI absolute biomethane table (g CO2eq/MJ): feedstock -> option -> [typical, default]
+const RED = {
+ "Wet manure":{"open|nc":[-20,22],"open|c":[-35,1],"closed|nc":[-88,-79],"closed|c":[-103,-100]},
+ "Maize":{"open|nc":[58,73],"open|c":[43,52],"closed|nc":[41,51],"closed|c":[26,30]},
+ "Biowaste":{"open|nc":[51,71],"open|c":[36,50],"closed|nc":[25,35],"closed|c":[10,14]}
+};
+const OPEN_STORAGE = {"Wet manure":69.56,"Biowaste":21.82,"Maize":13.51};
+const LHV=35.8, GRID_EF=0.31, COMPRESS=0.10, ELEC_SPEC=0.40, HEAT_PCT=0.10, FOSSIL=94, GWP_CH4=28, CH4_DENS=0.717;
+const MANURE=new Set(DB.filter(d=>d.cat==="Animal manure").map(d=>d.en));
+const BIOWASTE=new Set(DB.filter(d=>d.cat==="Green waste"||/MSW|Food waste|Bio-waste/i.test(d.en)).map(d=>d.en));
+const MODES={"Truck 40t (diesel)":[0.88,0.0879,25],"Truck 28t (diesel)":[1.05,0.0879,16],
+ "Tractor+trailer (diesel)":[1.80,0.0879,18],"Slurry tanker (diesel)":[1.20,0.0879,25],
+ "Van (diesel)":[2.50,0.0879,3],"Truck 40t (CNG/bio)":[0.95,0.0100,25],"Rail (electric)":[0.20,0.0861,1000],
+ "Pipeline (on-site)":[0.10,0.0861,99999],"On-site (0 km)":[0,0,99999]};
+const ELEC=[["Hungary grid",0.31,100],["On-site solar PV (off-grid)",0,0],["On-site wind (off-grid)",0,0],["Biogas CHP on-site",0,0],["PPA / GO (renewable)",0,0],["Grid green tariff (GO)",0,0]];
+const HEAT=[["Own biogas CHP waste heat",0,100],["Own biogas boiler",0,0],["Natural gas",0.0663,0],["Wood chips",0.0118,0],["Grid / district heat",0.05,0]];
+
+const CATS=["Bakery byproducts","Vegetable byproducts","Distillery byproducts","Food industry byproducts","Dairy byproducts","Confectionery byproducts","Manufacturing industry byproducts","Slaughterhouse & meat processing byproducts","Animal manure","Green waste","Other","Feed waste"];
+const CAT_HU={"Bakery byproducts":"Pékipari melléktermékek","Vegetable byproducts":"Zöldség melléktermékek","Distillery byproducts":"Szeszipari melléktermékek","Food industry byproducts":"Élelmiszeripari melléktermékek","Dairy byproducts":"Tejipari melléktermékek","Confectionery byproducts":"Édesipari melléktermékek","Manufacturing industry byproducts":"Gyártási melléktermékek","Slaughterhouse & meat processing byproducts":"Vágóhídi melléktermékek","Animal manure":"Állati trágya","Green waste":"Zöldhulladék","Other":"Egyéb","Feed waste":"Takarmányhulladék"};
+
+
+function calcGHG(inp){
+  let totCH4=0, totBiogas=0, manureCH4=0, biowasteCH4=0, etd_kg=0;
+  const per=[];
+  inp.feedstocks.forEach(f=>{
+    const ch4PerT=f.bg*f.pct;
+    const ch4=f.mass*ch4PerT, bg=f.mass*f.bg;
+    totCH4+=ch4; totBiogas+=bg;
+    if(MANURE.has(f.en))manureCH4+=ch4;
+    if(BIOWASTE.has(f.en))biowasteCH4+=ch4;
+    const m=MODES[f.mode]||[0.88,0.0879,25];
+    const e_kg=f.mass*(f.dist||0)*m[0]*m[1];
+    etd_kg+=e_kg;
+    per.push({en:f.en,cat:f.cat,mass:f.mass,bgPerT:f.bg,pct:f.pct,ch4PerT:ch4PerT,
+      biogasYr:bg,ch4Yr:ch4,energyGWh:ch4*LHV/3.6e6,mode:f.mode,dist:f.dist||0,etd_kg:e_kg});
+  });
+  const EMJ=totCH4*LHV, GWh=EMJ/3.6e6;
+  const ccs=inp.ccsMode==="on"?inp.ccsVal:0;
+  const mS=totCH4>0?manureCH4/totCH4:0, bS=totCH4>0?biowasteCH4/totCH4:0;
+  const nfeed=inp.feedstocks.length;
+  let det,detName;
+  if(totCH4===0){det="(no feedstock yet)";detName=null;}
+  else if(mS>=0.999){det="Wet manure";detName="Wet manure";}
+  else if(bS>=0.999){det="Biowaste";detName="Biowaste";}
+  else if(nfeed<=1){det="Single feedstock (no default)";detName=null;}
+  else {det="MIXTURE";detName=null;}
+  function wEF(mix){let tot=0,w=0;mix.forEach(s=>{tot+=s.pct;w+=s.pct*s.ef;});return{ef:tot>0?w/tot:0,sum:tot};}
+  const elecEF=wEF(inp.elecMix), heatEF=wEF(inp.heatMix);
+  let E=0, pathway, terms, defaultValue=null, defaultKey=null;
+  let ep=0, ep_break=null, etd=0, esca=0;
+  if(detName && RED[detName]){
+    pathway="default";
+    defaultKey=(inp.dig==="closed"?"closed":"open")+"|"+inp.offgas;
+    const v=RED[detName][defaultKey];
+    defaultValue=(inp.vtype==="typical"?v[0]:v[1]);
+    E=defaultValue - ccs;
+    terms={Eec:0,El:0,Ep:0,Etd:0,Eu:0,Esca:0,Eccs:-ccs};
+  } else {
+    pathway="actual";
+    ep_break={slip:0,electricity:0,heat:0,compression:0,openStorage:0};
+    if(EMJ>0){
+      ep_break.slip=(0.01*totCH4*CH4_DENS*GWP_CH4*1000)/EMJ;
+      ep_break.electricity=(totCH4*ELEC_SPEC*elecEF.ef*1000)/EMJ;
+      ep_break.heat=(HEAT_PCT*EMJ*heatEF.ef*1000)/EMJ;
+      if(inp.enduse!=="LNG")ep_break.compression=(totCH4*COMPRESS*GRID_EF*1000)/EMJ;
+      if(inp.dig==="open")ep_break.openStorage=OPEN_STORAGE[mS>=bS?"Wet manure":"Biowaste"];
+    }
+    ep=ep_break.slip+ep_break.electricity+ep_break.heat+ep_break.compression+ep_break.openStorage;
+    etd=EMJ>0?(etd_kg*1000)/EMJ:0;
+    esca=45*mS;
+    E=ep+etd-esca-ccs;
+    terms={Eec:0,El:0,Ep:ep,Etd:etd,Eu:0,Esca:-esca,Eccs:-ccs};
+  }
+  const saving=totCH4>0?(FOSSIL-E)/FOSSIL*100:0;
+  const oph=inp.ophours;
+  const premium=E>=0?45:45+(-E/100)*50;
+  const price=inp.ttf+premium;
+  const MWh=EMJ/3600, revenue=price*MWh;
+  return {totCH4,totBiogas,manureCH4,biowasteCH4,EMJ,GWh,MWh,
+    manureShare:mS,biowasteShare:bS,nfeed,det,detName,pathway,
+    elecEF:elecEF.ef,heatEF:heatEF.ef,elecSum:elecEF.sum,heatSum:heatEF.sum,
+    ccs,terms,defaultValue,defaultKey,ep,ep_break,etd,esca,
+    E,saving,premium,price,revenue,oph,per,
+    biogasH:totBiogas/oph,ch4H:totCH4/oph,avgMW:EMJ/oph/3600};
+}
+
+// ---------------------------------------------------------------------------
+// compute(): live UI update, driven by the pure engine above
+// ---------------------------------------------------------------------------
+
+// ---- Free preview: ~20 feedstocks, banded output, same calcGHG engine ----
+const FREE=["Cattle slurry","Pig slurry","Poultry slurry","Solid cattle manure","Solid poultry manure","Corn silage","Corn cob mix","Sorghum silage","Straw","Sugar beet pulp","Food waste","Organic municipal solid waste (biomass portion only)","City park grass","Green waste from garden and park maintenance","Brewer's grains","Molasses (sugar industry byproduct)","Milk whey, fresh (5% TS)","Glycerine","Used cooking oil sediment","Pressed sugar beet pulp"];
+const PDBMAP={}; DB.forEach(d=>PDBMAP[d.en]=d);
+const ITEMS=FREE.map(en=>PDBMAP[en]).filter(Boolean);
+const pstate={};
+const tb=document.getElementById('pbody');
+
+function buildRows(){
+  tb.innerHTML=ITEMS.map(d=>`<tr><td class="nm">${d.en}</td><td><input type="number" min="0" step="100" placeholder="0" data-en="${d.en.replace(/"/g,'&quot;')}"></td></tr>`).join("");
+  tb.querySelectorAll('input').forEach(el=>el.addEventListener('input',e=>{pstate[e.target.dataset.en]=parseFloat(e.target.value)||0;calc();}));
+}
+
+function band10(x){const lo=Math.floor(x/10)*10;return lo+" to "+(lo+10);}
+
+function calc(){
+  const feedstocks=ITEMS.filter(d=>pstate[d.en]>0).map(d=>({en:d.en,cat:d.cat,mass:pstate[d.en],dist:0,mode:"On-site (0 km)",bg:d.bg,pct:d.pct,ts:d.ts}));
+  // electricity source chosen by the user
+  const elecVal=document.getElementById('pelec').value;
+  const elecMix = elecVal==='renewable'
+    ? [{name:'Renewable / on-site',ef:0,pct:100}]
+    : [{name:'Grid electricity',ef:0.31,pct:100}];
+  const heatMix=[{name:'Own biogas heat',ef:0,pct:100}];
+  const inp={feedstocks,elecMix,heatMix,
+    enduse:"Grid injection",
+    vtype:"default",
+    dig:document.getElementById('pdig').value,
+    offgas:"c",ccsMode:"off",ccsVal:0,ophours:8000,ttf:35};
+  const band=document.getElementById('band'), sv=document.getElementById('bandsave'), gw=document.getElementById('bandgwh');
+  if(!feedstocks.length){band.textContent="—";sv.textContent="—";gw.textContent="—";return;}
+  const r=calcGHG(inp);
+  band.textContent=band10(r.E);
+  let s=r.saving, sLabel;
+  if(s>=100) sLabel="≥ 100%";
+  else if(s<0) sLabel="< 0%";
+  else {const sl=Math.floor(s/10)*10; sLabel="~ "+sl+"–"+(sl+10)+"%";}
+  sv.textContent=sLabel;
+  const g=r.GWh;
+  gw.textContent= g>0 ? ("~ "+(g>=10?Math.round(g):Math.round(g*10)/10)+" GWh") : "—";
+}
+
+buildRows();
+document.getElementById('pelec').addEventListener('change',calc);
+document.getElementById('pdig').addEventListener('change',calc);
+calc();
+
+// height reporter (resize parent iframe)
+function _rh(){try{var h=Math.max(document.body.scrollHeight,document.documentElement.scrollHeight);parent.postMessage({ghgHeight:h},'*');}catch(e){}}
+window.addEventListener('load',_rh);window.addEventListener('resize',_rh);
+if(window.ResizeObserver){new ResizeObserver(_rh).observe(document.body);}
+setTimeout(_rh,300);setTimeout(_rh,1200);
+// anchor links scroll the parent page
+document.addEventListener('click',function(e){
+  var a=e.target.closest?e.target.closest('a[href^="#"]'):null;
+  if(!a)return;
+  var id=a.getAttribute('href').slice(1); if(!id)return;
+  var el=document.getElementById(id); if(!el)return;
+  e.preventDefault();
+  var off=el.getBoundingClientRect().top+(window.scrollY||window.pageYOffset||0);
+  try{parent.postMessage({ghgScrollTo:off},'*');}catch(err){}
+});
+
+</script>
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Biomethane CI Calculator — DeCarbon Energy</title>
+<meta name="description" content="ISCC EU / RED III biomethane greenhouse-gas intensity calculator with an audit-ready report. Indicative aid — not a substitute for the ISCC EU audit. By DeCarbon Energy.">
+<style>
+:root{
+  --ink:#1A1A1A; --navy:#13323A; --slate:#46606A; --mute:#7c7c7c; --hair:#E6E6E6;
+  --soft:#F7F7F7; --green:#2E7D55; --greend:#256945; --bg:#FFFFFF; --yellow:#FBF1E3; --yellowb:#E4D2B0;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--ink);font-family:"Helvetica Neue",Arial,"Segoe UI",sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+a{color:inherit;text-decoration:none;}
+.wrap{max-width:1140px;margin:0 auto;padding:0 24px;}
+img{max-width:100%;}
+
+/* nav */
+.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--hair);}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;gap:16px;}
+.nav .logo{height:30px;}
+.nav .links{display:flex;align-items:center;gap:22px;font-size:14px;font-weight:600;}
+.nav .links a.muted{color:var(--slate);}
+.nav .links a.muted:hover{color:var(--ink);}
+.btn{display:inline-block;border-radius:5px;font-weight:700;cursor:pointer;border:0;transition:background .15s,transform .05s;}
+.btn:active{transform:translateY(1px);}
+.btn-green{background:var(--green);color:#fff;padding:11px 20px;font-size:14px;}
+.btn-green:hover{background:var(--greend);}
+.btn-outline{background:#fff;color:var(--green);border:1.5px solid var(--green);padding:9px 18px;font-size:14px;}
+.btn-outline:hover{background:#f1f8f4;}
+.btn-dark{background:var(--navy);color:#fff;padding:13px 24px;font-size:15px;}
+.btn-dark:hover{background:#0d2429;}
+.btn-ghost{background:#fff;color:var(--navy);border:1.5px solid var(--hair);padding:12px 24px;font-size:15px;}
+.btn-ghost:hover{border-color:var(--navy);}
+
+/* hero */
+.hero{background:linear-gradient(180deg,#fff 0%,#F4F7F6 100%);border-bottom:1px solid var(--hair);}
+.hero .wrap{padding:74px 24px 64px;text-align:center;}
+.kicker{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--green);font-weight:700;}
+.hero h1{font-size:50px;line-height:1.06;font-weight:800;letter-spacing:-.015em;margin:14px 0 16px;color:var(--ink);}
+.hero p.lead{font-size:18px;color:var(--slate);max-width:680px;margin:0 auto 30px;}
+.cta-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.statrow{display:flex;gap:40px;justify-content:center;flex-wrap:wrap;margin-top:46px;}
+.stat .v{font-size:30px;font-weight:800;color:var(--navy);}
+.stat .l{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);}
+
+/* sections */
+section{padding:64px 0;}
+.sec-head{text-align:center;max-width:680px;margin:0 auto 44px;}
+.sec-head .kicker{color:var(--green);}
+.sec-head h2{font-size:34px;font-weight:800;letter-spacing:-.01em;margin:10px 0 12px;}
+.sec-head p{font-size:16px;color:var(--slate);}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;}
+.step{position:relative;padding:26px 22px;border:1px solid var(--hair);border-radius:10px;background:#fff;}
+.step .num{width:34px;height:34px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;margin-bottom:14px;}
+.step h3{font-size:16px;font-weight:700;margin-bottom:6px;}
+.step p{font-size:13.5px;color:var(--slate);}
+
+/* features */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.feat{padding:24px;border:1px solid var(--hair);border-radius:10px;background:var(--soft);}
+.feat .ic{font-size:20px;margin-bottom:10px;}
+.feat h3{font-size:15.5px;font-weight:700;margin-bottom:6px;}
+.feat p{font-size:13.5px;color:var(--slate);}
+.bg-soft{background:var(--soft);border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);}
+
+/* pricing */
+.prices{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;align-items:stretch;}
+.price{display:flex;flex-direction:column;padding:28px 22px;border:1px solid var(--hair);border-radius:12px;background:#fff;}
+.price.featured{border:2px solid var(--green);box-shadow:0 12px 34px rgba(46,125,85,.12);position:relative;}
+.price.compare{background:var(--soft);border-style:dashed;}
+.price .tag{position:absolute;top:-12px;left:22px;background:var(--green);color:#fff;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:4px 12px;border-radius:20px;}
+.price .tag.grey{position:static;display:inline-block;background:#c2ccd0;color:#33474e;margin-bottom:10px;}
+.price .pname{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--slate);}
+.price .pamt{font-size:34px;font-weight:800;color:var(--ink);margin:10px 0 2px;letter-spacing:-.01em;}
+.price.compare .pamt{color:var(--mute);}
+.price .pamt small{font-size:14px;font-weight:600;color:var(--mute);}
+.price .pdesc{font-size:13px;color:var(--slate);margin-bottom:16px;min-height:54px;}
+.price ul{list-style:none;font-size:13px;color:var(--ink);margin-bottom:22px;flex:1;}
+.price li{padding:6px 0 6px 24px;position:relative;border-bottom:1px solid var(--soft);}
+.price li:before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:800;}
+.price.compare li:before{content:"–";color:var(--mute);}
+.price .btn{width:100%;text-align:center;}
+.price .disabled{display:block;width:100%;text-align:center;padding:12px 0;border-radius:5px;background:#eef2f3;color:#8a979c;font-weight:700;font-size:13px;}
+
+/* footer */
+footer{background:#000;color:#c9d2d6;}
+footer .top{display:flex;justify-content:space-between;gap:40px;flex-wrap:wrap;padding:44px 0 28px;border-bottom:1px solid rgba(255,255,255,.12);}
+footer .brand{max-width:320px;}
+footer .logochip{display:inline-block;background:#fff;padding:8px 12px;border-radius:8px;margin-bottom:14px;}
+footer .logochip img{height:26px;display:block;}
+footer .brand p{font-size:13px;color:#9fb1b7;line-height:1.6;}
+footer .cols{display:flex;gap:60px;flex-wrap:wrap;}
+footer .col h4{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#80979e;margin-bottom:12px;font-weight:700;}
+footer .col a{display:block;font-size:14px;color:#cfd6d9;margin-bottom:9px;}
+footer .col a:hover{color:#fff;}
+footer .bottom{padding:18px 0;font-size:12px;color:#80979e;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+
+@media(max-width:980px){
+  .steps{grid-template-columns:repeat(2,1fr);}
+  .features{grid-template-columns:1fr 1fr;}
+  .prices{grid-template-columns:1fr 1fr;}
+  .hero h1{font-size:38px;}
+}
+@media(max-width:600px){
+  .nav .links a.muted{display:none;}
+  .steps,.features,.prices{grid-template-columns:1fr;}
+  .hero h1{font-size:31px;}
+  .hero .wrap{padding:54px 24px 44px;}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap">
+    <a href="#top"><img class="logo" src="https://cdn.prod.website-files.com/68bd30984b2e2994dfa84953/6a216bcfa4f8e4b053f9f3d0_logo%20al%C3%A1%C3%ADr%C3%A1shoz.png" alt="DeCarbon Energy"></a>
+    <div class="links">
+      <a class="muted" href="#how">How it works</a>
+      <a class="muted" href="#features">What you get</a>
+      <a class="muted" href="#pricing">Pricing</a>
+      <a class="btn btn-outline" href="#pricing">Sign up</a>
+      <a class="btn btn-green" href="preview.html">Try it free</a>
+    </div>
+  </div>
+</nav>
+
+<header id="top" class="hero">
+  <div class="wrap">
+    <div class="kicker">ISCC EU · RED III · Annex VI</div>
+    <h1>Biomethane CI Calculator</h1>
+    <p class="lead">Calculate the carbon intensity (CI) of your transport biomethane to the RED III Annex VI methodology — and generate an audit-ready report your Certification Body can read. In minutes, not weeks.</p>
+    <div class="cta-row">
+      <a class="btn btn-dark" href="preview.html">Try the free preview →</a>
+      <a class="btn btn-ghost" href="#pricing">Sign up &amp; pricing</a>
+    </div>
+    <div class="statrow">
+      <div class="stat"><div class="v">162</div><div class="l">feedstocks built in</div></div>
+      <div class="stat"><div class="v">Annex VI</div><div class="l">RED III methodology</div></div>
+      <div class="stat"><div class="v">PDF</div><div class="l">audit-ready report</div></div>
+    </div>
+  </div>
+</header>
+
+<section id="how">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">How it works</div>
+      <h2>From feedstock to a report your auditor reads</h2>
+      <p>The calculator does the heavy lifting. You enter what goes into the digester; it returns the certified-format numbers and the document.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="num">1</div><h3>Enter your feedstocks</h3><p>Pick from 162 substrates and enter yearly tonnage. Transport, energy mix and process settings are pre-filled and editable.</p></div>
+      <div class="step"><div class="num">2</div><h3>Get the GHG intensity</h3><p>Instant gCO₂eq/MJ — per feedstock and weighted — with the saving against the 94 gCO₂eq/MJ fossil comparator.</p></div>
+      <div class="step"><div class="num">3</div><h3>Generate the report</h3><p>One click produces a branded, itemized RED III Annex VI report with applied factors, sources, watermark and unique ID.</p></div>
+      <div class="step"><div class="num">4</div><h3>Take it to your CB</h3><p>Hand the report to your Certification Body. The tool computes; the CB audits and issues the binding Proof of Sustainability.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="features" class="bg-soft">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">What you get</div>
+      <h2>Built for the audit, not just a number</h2>
+    </div>
+    <div class="features">
+      <div class="feat"><div class="ic">📊</div><h3>Itemized Annex VI calculation</h3><p>Every emission term (Eec, El, Ep, Etd, Eu, Esca, Eccs) laid out, with the Ep breakdown — slip, electricity, heat, compression, storage.</p></div>
+      <div class="feat"><div class="ic">🧾</div><h3>Applied factors &amp; sources</h3><p>The emission factors used, each with its basis — RED III Annex VI, ISCC EU 205, IPCC AR5 — so the methodology is transparent.</p></div>
+      <div class="feat"><div class="ic">⚖️</div><h3>Default &amp; actual pathways</h3><p>Pure manure or biowaste uses the RED III default value; mixtures fall back to the actual energy-share calculation automatically.</p></div>
+      <div class="feat"><div class="ic">🔒</div><h3>Licensed, non-transferable PDF</h3><p>Each report carries a watermark, a unique report ID and a “prepared for [facility] — not transferable” licence line.</p></div>
+      <div class="feat"><div class="ic">💶</div><h3>Indicative offtake value</h3><p>See the green premium, offtake price and annual revenue implied by your GHG intensity — a commercial read, alongside the compliance number.</p></div>
+      <div class="feat"><div class="ic">⚡</div><h3>Instant &amp; up to date</h3><p>Reflects current rules — including the 2026 compression requirement — and recalculates live as you change inputs.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">Pricing</div>
+      <h2>Replace the expensive middle step</h2>
+      <p>The preview calculator is free. Subscribe to unlock the full calculator, the exact value, the detailed Annex VI calculation and the audit-ready report.</p>
+    </div>
+    <div class="prices">
+      <div class="price compare">
+        <span class="tag grey">For comparison</span>
+        <div class="pname">Traditional consultant</div>
+        <div class="pamt">~€5,000<small> / report</small></div>
+        <div class="pdesc">What an external consultant typically charges for a single GHG calculation — shown for comparison, not sold here.</div>
+        <ul>
+          <li>One report, weeks of turnaround</li>
+          <li>Pay again for every recalculation</li>
+          <li>Manual, not always up to date</li>
+          <li>No self-service</li>
+        </ul>
+        <span class="disabled">Not available here</span>
+      </div>
+      <div class="price">
+        <div class="pname">Monthly</div>
+        <div class="pamt">€100<small> / month</small></div>
+        <div class="pdesc">Full access, billed monthly. Cancel anytime.</div>
+        <ul>
+          <li>Full 162-feedstock calculator</li>
+          <li>Exact GHG intensity value</li>
+          <li>Unlimited audit-ready reports</li>
+          <li>Detailed Annex VI breakdown</li>
+        </ul>
+        <a class="btn btn-ghost" href="calculator.html">Start monthly</a>
+      </div>
+      <div class="price featured">
+        <div class="tag">Best value</div>
+        <div class="pname">Annual</div>
+        <div class="pamt">€800<small> / year</small></div>
+        <div class="pdesc">Everything in Monthly — save ~4 months versus paying monthly.</div>
+        <ul>
+          <li>Full 162-feedstock calculator</li>
+          <li>Exact value + indicative offtake</li>
+          <li>Unlimited audit-ready reports</li>
+          <li>Always on the current methodology</li>
+        </ul>
+        <a class="btn btn-green" href="calculator.html">Get annual</a>
+      </div>
+      <div class="price">
+        <div class="pname">Portfolio / white-label</div>
+        <div class="pamt">Custom</div>
+        <div class="pdesc">For multi-plant portfolios, consultants and Certification Bodies.</div>
+        <ul>
+          <li>Multiple plants &amp; users</li>
+          <li>White-label option</li>
+          <li>Priority support</li>
+          <li>Tailored terms</li>
+        </ul>
+        <a class="btn btn-ghost" href="mailto:hello@decarbon.energy?subject=Biomethane%20GHG%20Calculator%20—%20Portfolio">Contact us</a>
+      </div>
+    </div>
+    <p style="text-align:center;font-size:12px;color:var(--mute);margin-top:18px;">Subscription pricing, EUR, VAT handled at checkout. Cancel monthly anytime. Consultant figure is an indicative market reference only.</p>
+  </div>
+</section>
+
+<section style="padding-top:0;">
+  <div class="wrap">
+    <div style="background:var(--yellow);border:1px solid var(--yellowb);border-radius:10px;padding:18px 22px;font-size:13px;color:#7a4a16;max-width:900px;margin:0 auto;"><b>DISCLAIMER.</b> The Biomethane CI Calculator is an indicative engineering tool. It does <b>not</b> replace the ISCC EU audit and is <b>not</b> an official greenhouse-gas calculation. The binding GHG value and the Proof of Sustainability can only be issued through the ISCC EU certification process by an accredited Certification Body. Property of DeCarbon Energy Kft.</div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">
+        <span class="logochip"><img src="https://cdn.prod.website-files.com/68bd30984b2e2994dfa84953/6a216bcfa4f8e4b053f9f3d0_logo%20al%C3%A1%C3%ADr%C3%A1shoz.png" alt="DeCarbon Energy"></span>
+        <p>Biomethane CI Calculator — ISCC EU / RED III Annex VI carbon intensity (CI) and audit-ready reporting for transport biomethane.</p>
+      </div>
+      <div class="cols">
+        <div class="col">
+          <h4>Product</h4>
+          <a href="#how">How it works</a>
+          <a href="#features">What you get</a>
+          <a href="#pricing">Pricing</a>
+          <a href="preview.html">Free preview</a>
+        </div>
+        <div class="col">
+          <h4>Company</h4>
+          <a href="https://decarbon.energy" target="_top">decarbon.energy</a>
+          <a href="https://decarbon.energy/privacy-policy" target="_top">Privacy Policy</a>
+          <a href="mailto:hello@decarbon.energy">Contact</a>
+        </div>
+      </div>
+    </div>
+    <div class="bottom">
+      <span>© DeCarbon Energy Kft. · All rights reserved.</span>
+      <span>Not a substitute for the ISCC EU audit.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// height reporter (resize the parent iframe)
+function _rh(){try{var h=Math.max(document.body.scrollHeight,document.documentElement.scrollHeight);parent.postMessage({ghgHeight:h},'*');}catch(e){}}
+window.addEventListener('load',_rh);window.addEventListener('resize',_rh);
+if(window.ResizeObserver){new ResizeObserver(_rh).observe(document.body);}
+setTimeout(_rh,300);setTimeout(_rh,1200);
+// anchor links: scroll the PARENT page (the iframe has no internal scroll)
+document.addEventListener('click',function(e){
+  var a=e.target.closest?e.target.closest('a[href^="#"]'):null;
+  if(!a)return;
+  var id=a.getAttribute('href').slice(1);
+  var el=id?document.getElementById(id):document.body;
+  if(!el)return;
+  e.preventDefault();
+  var off=el.getBoundingClientRect().top+(window.scrollY||window.pageYOffset||0);
+  try{parent.postMessage({ghgScrollTo:off},'*');}catch(err){}
+});
+</script>
+</body>
+</html>

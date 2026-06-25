@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Biomethane CI Calculator — DeCarbon Energy</title>
+<style>
+:root{
+  --navy:#1A1A1A; --teal:#4A4A4A; --slate:#7c7c7c; --hair:#E6E6E6;
+  --ink:#1A1A1A; --mute:#7c7c7c; --accent:#1A1A1A; --soft:#F7F7F7;
+  --yellow:#FFFDF2; --yellowb:#D9D2B8; --green:#2E7D55; --bg:#FFFFFF;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Helvetica Neue",Arial,"Segoe UI",sans-serif;font-size:14px;line-height:1.5;}
+.wrap{max-width:1200px;margin:0 auto;padding:0 20px 80px;}
+/* header band */
+.band{background:#fff;color:var(--ink);padding:24px 28px 20px;margin:0 -20px 0;border-bottom:2px solid var(--ink);
+  display:flex;align-items:center;justify-content:space-between;gap:20px;}
+.band .kicker{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--slate);font-weight:700;}
+.band h1{margin:6px 0 2px;font-size:24px;font-weight:700;letter-spacing:.01em;color:var(--ink);}
+.band .sub{font-size:13px;color:var(--slate);font-style:italic;}
+.band .brandlogo{height:34px;width:auto;flex:none;}
+
+.topmeta{display:flex;justify-content:space-between;font-size:11px;color:var(--mute);padding:10px 0;border-bottom:1px solid var(--hair);}
+/* section */
+h2.sec{font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink);background:var(--soft);
+  padding:9px 14px;margin:34px 0 0;border-radius:2px 2px 0 0;border:1px solid var(--hair);border-bottom:2px solid var(--ink);}
+h2.sec .hu{font-weight:400;color:var(--slate);text-transform:none;letter-spacing:0;font-size:12px;}
+.card{background:#fff;border:1px solid var(--hair);border-top:none;border-radius:0 0 2px 2px;padding:18px 16px;}
+.note{font-size:12px;color:var(--mute);font-style:italic;margin:8px 2px 0;}
+/* settings grid */
+.settings{display:grid;grid-template-columns:1fr 1fr;gap:14px 22px;}
+.settings>label.fld{min-width:0;}
+
+label.fld{display:block;font-size:12px;}
+label.fld .lab{display:block;font-weight:600;color:var(--ink);margin-bottom:4px;}
+label.fld .lab .hu{font-weight:400;color:var(--mute);}
+select,input[type=number],input[type=text]{width:100%;padding:9px 10px;font-size:14px;font-weight:600;color:#000;
+  background:var(--yellow);border:1px solid var(--yellowb);border-radius:3px;outline:none;}
+select:focus,input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(201,138,43,.18);}
+.fixed{background:#EFF2F3 !important;border-color:#cdd6d9 !important;color:#5b6c73 !important;font-weight:600;}
+/* feedstock table */
+.tablewrap{overflow-x:visible;}
+table{border-collapse:collapse;font-size:13px;width:100%;table-layout:fixed;}
+thead th{font-size:10px;text-transform:uppercase;letter-spacing:.02em;color:#fff;background:var(--ink);
+  font-weight:600;text-align:left;padding:8px 6px;}
+thead th.num{text-align:right;}
+tbody td{padding:5px 6px;border-bottom:1px solid var(--hair);vertical-align:middle;}
+tr.cat td{background:var(--soft);color:var(--ink);font-weight:700;font-size:11px;letter-spacing:.05em;
+  text-transform:uppercase;padding:7px 10px;border-top:1px solid var(--ink);border-bottom:1px solid var(--hair);}
+td.en{font-weight:600;color:var(--ink);}
+td.hu{color:var(--mute);font-style:italic;}
+col.c-en{width:17%} col.c-hu{width:13%} col.c-bg{width:7%} col.c-pct{width:6%} col.c-ts{width:5%}
+col.c-mass{width:8%} col.c-km{width:5%} col.c-mode{width:15%} col.c-bgy{width:8%} col.c-ch4y{width:8%} col.c-out{width:8%}
+td.bgm input,td.pct input,td.ts input,td.mass input,td.dist input{text-align:right;padding:7px 7px;font-size:13px;width:100%;}
+td.mode select{padding:6px 5px;font-size:11px;font-weight:500;background:var(--yellow);width:100%;}
+td.out{text-align:right;font-variant-numeric:tabular-nums;color:var(--slate);}
+/* search */
+.search{margin:0 0 10px;}
+.search input{background:#fff;border:1px solid var(--hair);font-weight:400;}
+/* result */
+.result{margin-top:8px;}
+.layout{display:grid;grid-template-columns:1fr;gap:0;}
+.rgrid{display:flex;flex-direction:column;}
+.rgrid>.result{order:-1;}
+@media(max-width:1024px){.rgrid{grid-template-columns:1fr}}
+.ebox{background:var(--navy);color:#fff;border-radius:4px;padding:20px;text-align:center;}
+.ebox .elab{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#9fb8bf;}
+.ebox .eval{font-size:42px;font-weight:700;line-height:1.1;margin:4px 0 0;}
+.ebox .eunit{font-size:12px;color:#9fb8bf;}
+.savebox{background:var(--green);color:#fff;border-radius:4px;padding:14px 18px;text-align:center;margin-top:12px;}
+.savebox .sval{font-size:26px;font-weight:700;}
+.savebox .slab{font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.85;}
+.detbox{font-size:13px;border:1px solid var(--hair);border-radius:4px;padding:12px 14px;margin-top:12px;background:#fff;}
+.detbox b{color:var(--navy);}
+.bars{margin-top:6px;}
+.barrow{display:grid;grid-template-columns:120px 1fr 64px;align-items:center;gap:8px;margin:5px 0;font-size:12px;}
+.barrow .bn{color:var(--slate);}
+.bartrack{position:relative;height:14px;background:#EEF3F4;border-radius:2px;overflow:hidden;}
+.barfill{position:absolute;top:0;height:100%;}
+.barfill.pos{background:#9AA7AD;}
+.barfill.neg{background:var(--green);}
+.barrow .bv{text-align:right;font-variant-numeric:tabular-nums;}
+.barrow.total .bn{font-weight:700;color:var(--navy);}
+.barrow.total .bv{font-weight:700;}
+.kpis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;}
+.kpi{background:var(--soft);border:1px solid var(--hair);border-radius:4px;padding:9px;text-align:center;}
+.kpi .v{font-size:17px;font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums;}
+.kpi .l{font-size:10px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em;}
+.energy{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+
+.srcrow{display:grid;grid-template-columns:1fr 70px;gap:8px;align-items:center;margin:4px 0;font-size:12px;}
+.srcrow input{padding:5px 7px;text-align:right;}
+.sumline{font-size:11px;color:var(--mute);text-align:right;margin-top:4px;}
+.disclaimer{margin-top:26px;border:1px solid var(--yellowb);background:#FBF1E3;border-radius:4px;padding:14px 16px;font-size:12px;color:#7a4a16;}
+.disclaimer b{color:#7a4a16;}
+.foot{margin-top:18px;font-size:11px;color:var(--mute);text-align:center;border-top:1px solid var(--hair);padding-top:12px;}
+.hint{font-size:11px;color:var(--mute);margin:2px 0 0;}
+
+.flowhint{font-size:12px;color:var(--mute);font-style:italic;margin:0 2px 14px;}
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:0;}
+.flowstep{display:flex;align-items:center;}
+.fbox{min-width:104px;border:1px solid var(--hair);border-top:3px solid var(--slate);border-radius:4px;
+  padding:10px 12px;text-align:center;background:#fff;}
+.fbox.add{border-top-color:#9AA7AD;}
+.fbox.red{border-top-color:var(--green);}
+.fbox.total{border-top-color:var(--ink);background:var(--ink);}
+.fbox .fn{font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--mute);font-weight:700;}
+.fbox.total .fn{color:#cfd6d9;}
+.fbox .fv{font-size:18px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;margin-top:3px;}
+.fbox.red .fv{color:var(--green);}
+.fbox.total .fv{color:#fff;font-size:22px;}
+.fbox .fsub{font-size:9px;color:var(--mute);margin-top:2px;line-height:1.2;}
+.farrow{font-size:18px;color:#c2ccd0;padding:0 6px;font-weight:700;align-self:center;}
+
+
+.addrow{display:flex;gap:8px;margin:8px 0 14px;}
+.addrow input{flex:1;background:#fff;border:1px solid var(--hair);font-weight:400;padding:9px 10px;border-radius:3px;}
+.addrow button{background:var(--ink);color:#fff;border:0;border-radius:3px;padding:9px 16px;font-weight:600;cursor:pointer;font-size:13px;white-space:nowrap;}
+.addrow button:hover{background:#000;}
+td.delcell{text-align:center;width:42px;}
+td.delcell button{background:none;border:0;color:var(--mute);cursor:pointer;font-size:16px;line-height:1;padding:4px 6px;border-radius:3px;}
+td.delcell button:hover{color:#b3261e;background:#f7e9e8;}
+col.c-x{width:42px}
+
+
+
+
+
+
+
+
+.ophrs{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;color:var(--mute);}
+.ophrs input{width:90px;padding:6px 8px;text-align:right;}
+.offtake{margin-top:14px;border:1px solid var(--hair);border-top:3px solid var(--green);border-radius:4px;padding:14px;background:#fff;}
+.offhead{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--ink);margin-bottom:10px;}
+.offrow{display:grid;grid-template-columns:1fr 110px;align-items:center;gap:8px;font-size:12px;color:var(--slate);margin-bottom:10px;}
+.offrow input{padding:6px 8px;text-align:right;}
+.offkpis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.offkpis .kpi .v{color:var(--green);}
+.offnote{font-size:11px;color:var(--mute);font-style:italic;margin-top:10px;}
+
+/* --- report generator button --- */
+.genbtn{width:100%;margin-top:16px;background:var(--green);color:#fff;border:0;border-radius:4px;
+  padding:13px 16px;font-size:14px;font-weight:700;letter-spacing:.02em;cursor:pointer;}
+.genbtn:hover{background:#256945;}
+.genbtn:active{transform:translateY(1px);}
+.genhint{font-size:11px;color:var(--mute);font-style:italic;margin-top:6px;text-align:center;}
+input[type=text]::placeholder{color:#9a9a8f;font-weight:400;}
+</style>
+</head>
+<body>
+<div style="position:sticky;top:0;z-index:200;background:#fff;border-bottom:1px solid #E6E6E6;">
+  <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:10px 20px;gap:16px;">
+    <a href="index.html" target="_top" style="display:flex;align-items:center;text-decoration:none;"><img src="https://cdn.prod.website-files.com/68bd30984b2e2994dfa84953/6a216bcfa4f8e4b053f9f3d0_logo%20al%C3%A1%C3%ADr%C3%A1shoz.png" alt="DeCarbon Energy" style="height:26px;"></a>
+    <div style="display:flex;align-items:center;gap:18px;font-size:13.5px;font-weight:600;">
+      <a href="#how" style="color:#46606A;text-decoration:none;">How it works</a>
+      <a href="index.html#pricing" target="_top" style="color:#46606A;text-decoration:none;">Settings</a>
+      <a href="index.html#pricing" target="_top" style="background:#2E7D55;color:#fff;text-decoration:none;padding:8px 16px;border-radius:5px;">Subscription</a>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+  <div class="band">
+    <div class="bandtext">
+      <div class="kicker">ISCC EU · RED III · Annex VI</div>
+      <h1>Biomethane CI Calculator</h1>
+      <div class="sub">Transport biomethane carbon intensity (CI) — RED III / ISCC EU 205</div>
+    </div>
+    <img class="brandlogo" src="https://cdn.prod.website-files.com/68bd30984b2e2994dfa84953/6a216bcfa4f8e4b053f9f3d0_logo%20al%C3%A1%C3%ADr%C3%A1shoz.png" alt="DeCarbon Energy">
+  </div>
+  <div class="topmeta"><span>DeCarbon Energy Kft.</span><span id="todayMeta">2026</span></div>
+  <div id="how" style="border:1px solid #E6E6E6;border-radius:6px;background:#F7F7F7;padding:14px 16px;margin-top:14px;scroll-margin-top:60px;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#2E7D55;margin-bottom:8px;">How it works</div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:#46606A;line-height:1.45;">
+      <div style="flex:1;min-width:170px;"><b style="color:#13323A;">1. Enter feedstocks</b><br>Add yearly tonnage; biogas factors &amp; transport are pre-filled and editable.</div>
+      <div style="flex:1;min-width:170px;"><b style="color:#13323A;">2. Set energy &amp; process</b><br>Electricity/heat mix, digestate storage, end use, optional CO₂ capture.</div>
+      <div style="flex:1;min-width:170px;"><b style="color:#13323A;">3. Read the result</b><br>Exact gCO₂eq/MJ, saving vs the 94 fossil comparator, itemized Annex VI terms.</div>
+      <div style="flex:1;min-width:170px;"><b style="color:#13323A;">4. Generate the report</b><br>One click → branded, audit-ready PDF for your Certification Body.</div>
+    </div>
+  </div>
+
+  <div class="rgrid">
+    <div>
+      <!-- FACILITY / REPORT DETAILS -->
+      <h2 class="sec">1. Facility &amp; report details</h2>
+      <div class="card">
+        <div class="settings">
+          <label class="fld"><span class="lab">Facility / plant name</span>
+            <input type="text" id="plantName" placeholder="e.g. Example Biogas Plant Kft."></label>
+          <label class="fld"><span class="lab">Operator</span>
+            <input type="text" id="operator" placeholder="Operating company"></label>
+          <label class="fld"><span class="lab">Location</span>
+            <input type="text" id="location" placeholder="City, country"></label>
+          <label class="fld"><span class="lab">Reporting period</span>
+            <input type="text" id="period" placeholder="e.g. calendar year 2026"></label>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <h2 class="sec">2. Key settings</h2>
+      <div class="card">
+        <div class="settings">
+          <label class="fld"><span class="lab">End use</span>
+            <select id="enduse"><option>CNG</option><option>LNG</option><option selected>Grid injection</option></select></label>
+          <label class="fld"><span class="lab">Value type</span>
+            <select id="vtype"><option value="default">default</option><option value="typical">typical</option></select></label>
+          <label class="fld"><span class="lab">Digestate storage</span>
+            <select id="dig"><option value="closed">closed</option><option value="open">open</option></select></label>
+          <label class="fld"><span class="lab">Upgrading off-gas</span>
+            <select id="offgas"><option value="combusted">combusted</option><option value="not combusted">not combusted</option></select></label>
+          <label class="fld"><span class="lab">CO₂ capture e_ccs/e_ccr</span>
+            <select id="ccsmode"><option value="off">off</option><option value="on">on</option></select></label>
+          <label class="fld"><span class="lab">CO₂ captured (g CO₂eq/MJ)</span>
+            <input type="number" id="ccsval" value="0" min="0" step="1"></label>
+        </div>
+      </div>
+
+      <!-- FEEDSTOCK -->
+      <h2 class="sec">3. Feedstocks &amp; transport</h2>
+      <div class="card">
+        <div class="hint">Enter the yearly tonnage only; everything else is calculated.</div>
+        <div class="tablewrap"><table id="ftable">
+          <colgroup><col class="c-en"><col class="c-bg"><col class="c-pct"><col class="c-ts"><col class="c-mass"><col class="c-km"><col class="c-mode"><col class="c-bgy"><col class="c-ch4y"><col class="c-out"></colgroup>
+          <thead><tr>
+            <th>Substrate</th>
+            <th class="num">Biogas m³/t</th><th class="num">CH₄ %</th><th class="num">TS %</th>
+            <th class="num">t / yr</th><th class="num">km</th><th>Transport mode</th>
+            <th class="num">Biogas m³/yr</th><th class="num">CH₄ m³/yr</th><th class="num">GWh/yr</th>
+          </tr></thead>
+          <tbody id="fbody"></tbody>
+        </table></div>
+      </div>
+
+      <!-- ENERGY -->
+      <h2 class="sec">4. Energy use</h2>
+      <div class="card">
+        <div class="hint">Give the % source mix (each column sums to 100%). Own biogas &amp; off-grid renewable ≈ 0.</div>
+        <div class="energy" style="margin-top:10px;">
+          <div>
+            <div style="font-weight:700;font-size:12px;color:var(--slate);margin-bottom:6px;">Electricity</div>
+            <div id="elecsrc"></div>
+            <div class="sumline" id="elecsum"></div>
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:12px;color:var(--slate);margin-bottom:6px;">Heat</div>
+            <div id="heatsrc"></div>
+            <div class="sumline" id="heatsum"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="result">
+      <h2 class="sec">Result</h2>
+      <div class="card">
+        <div class="ebox">
+          <div class="elab">E — total</div>
+          <div class="eval" id="E">0.0</div>
+          <div class="eunit">g CO₂eq / MJ</div>
+        </div>
+        <div class="savebox">
+          <div class="sval" id="save">0%</div>
+          <div class="slab">GHG saving</div>
+        </div>
+        <div class="detbox">
+          <div>Detected feedstock:<br><b id="det">—</b></div>
+          <div id="check" style="margin-top:8px;color:#9C3A1A;font-size:12px;"></div>
+        </div>
+        <div class="kpis">
+          <div class="kpi"><div class="v" id="kBiogas">0</div><div class="l">Biogas Nm³/yr</div></div>
+          <div class="kpi"><div class="v" id="kCH4">0</div><div class="l">Biomethane Nm³/yr</div></div>
+          <div class="kpi"><div class="v" id="kGWh">0</div><div class="l">GWh/yr</div></div>
+        </div>
+        <div class="kpis" style="margin-top:8px;">
+          <div class="kpi"><div class="v" id="kBiogasH">0</div><div class="l">Biogas Nm³/h</div></div>
+          <div class="kpi"><div class="v" id="kCH4H">0</div><div class="l">Biomethane Nm³/h</div></div>
+          <div class="kpi"><div class="v" id="kMWh">0</div><div class="l">MW (avg)</div></div>
+        </div>
+        <div class="ophrs">
+          <span>Operating hours (h/yr):</span>
+          <input type="number" id="ophours" min="1" max="8760" step="100" value="8000">
+        </div>
+
+        <div class="offtake">
+          <div class="offhead">Indicative offtake price</div>
+          <div class="offrow"><span>TTF base (EUR/MWh)</span><input type="number" id="ttf" value="35" step="1"></div>
+          <div class="offkpis">
+            <div class="kpi"><div class="v" id="kPrem">0</div><div class="l">Green premium €/MWh</div></div>
+            <div class="kpi"><div class="v" id="kPrice">0</div><div class="l">Offtake price €/MWh</div></div>
+            <div class="kpi"><div class="v" id="kRev">0</div><div class="l">Revenue €/yr</div></div>
+          </div>
+          <div class="offnote">Green premium: 45 €/MWh at E ≥ 0, rising linearly to 95 €/MWh at E = −100 g/MJ.</div>
+        </div>
+
+        <button id="genReport" class="genbtn">Generate audit-ready report (PDF)</button>
+        <div class="genhint">Fill in the facility details above, then download a branded, itemized report for your ISCC EU audit.</div>
+      </div>
+      <div class="disclaimer">
+        <b>DISCLAIMER</b> — This calculator does NOT replace the ISCC EU audit and is NOT an official calculation. Indicative aid only; the binding value and Proof of Sustainability must be issued through the ISCC certification process. Property of DeCarbon Energy Kft.
+      </div>
+    </div>
+  </div>
+  <h2 class="sec" style="margin-top:34px;">Emissions by section</h2>
+  <div class="card">
+    <div class="flowhint">Each emission term as a column (g CO₂eq/MJ). Positive = adds, negative = reduces.</div>
+    <div id="chart"></div>
+  </div>
+
+  <div class="foot">© DeCarbon Energy Kft. · ISCC EU Biomethane GHG model · 2026 · not a substitute for the ISCC EU audit</div>
+</div>
+
+<script>
+
+const DB = [{"en":"Baking residues","hu":"Sütési hulladék","cat":"Bakery byproducts","bg":434,"pct":0.53,"ch4":230,"ts":87},{"en":"Old bread","hu":"Száraz kenyér","cat":"Bakery byproducts","bg":434,"pct":0.53,"ch4":230,"ts":87},{"en":"Sorted out dry pasta","hu":"Selejt száraztészta","cat":"Bakery byproducts","bg":472,"pct":0.53,"ch4":250,"ts":90},{"en":"Cannery waste water sludge","hu":"Konzervipari 1. és 2. iszap","cat":"Vegetable byproducts","bg":23,"pct":0.53,"ch4":12,"ts":3},{"en":"Grass fiber residues from the production of grass protein","hu":"Fűfehérje termeléséből származó fűrost-maradványok","cat":"Vegetable byproducts","bg":170,"pct":0.53,"ch4":90,"ts":35},{"en":"Hevea seed","hu":"Kaucsukfa mag","cat":"Vegetable byproducts","bg":0,"pct":0.53,"ch4":0,"ts":0},{"en":"Maize husk","hu":"Kukorica Csuhé konzervipari melléktermék","cat":"Vegetable byproducts","bg":283,"pct":0.53,"ch4":150,"ts":88},{"en":"Potato peelings","hu":"Burgonyahéj","cat":"Vegetable byproducts","bg":142,"pct":0.53,"ch4":75,"ts":20},{"en":"Potato process water from starch production","hu":"Keményítőgyártásból származó burgonya kezelővize","cat":"Vegetable byproducts","bg":142,"pct":0.53,"ch4":75,"ts":20},{"en":"Potato pulp from Starke production","hu":"Burgonyapép a keményítőgyártásból","cat":"Vegetable byproducts","bg":142,"pct":0.53,"ch4":75,"ts":20},{"en":"Potatoes","hu":"Burgonya","cat":"Vegetable byproducts","bg":142,"pct":0.53,"ch4":75,"ts":20},{"en":"Toxicated/polluted wet maise fiber (up to 60% water content). (originally intended for life stock feeding)","hu":"Nedves kukoricarost (PWF,CGF,WDGS stb.)","cat":"Vegetable byproducts","bg":23,"pct":0.53,"ch4":12,"ts":3},{"en":"Vegetable scraps","hu":"Zöldséghulladékok","cat":"Vegetable byproducts","bg":109,"pct":0.53,"ch4":58,"ts":12},{"en":"Vegetables (sorted out)","hu":"Zöldségek (kiválogatva)","cat":"Vegetable byproducts","bg":109,"pct":0.53,"ch4":58,"ts":12},{"en":"Alcoholic sludge from ISO sugar production","hu":"Sűrűszeszmoslék (bioetanol melléktermék)","cat":"Distillery byproducts","bg":145,"pct":0.55,"ch4":80,"ts":20},{"en":"Brewer's grains","hu":"Söripari gabona maradék","cat":"Distillery byproducts","bg":418,"pct":0.55,"ch4":230,"ts":87},{"en":"Corn cleaning residue","hu":"Kukorica tisztítási maradék (bioetanol melléktermék)","cat":"Distillery byproducts","bg":145,"pct":0.55,"ch4":80,"ts":20},{"en":"DDGS (distillers dried grains)","hu":"DDGS (szárított gabonamoslék)","cat":"Distillery byproducts","bg":418,"pct":0.55,"ch4":230,"ts":88},{"en":"Fruit pomace and grape pomace (fresh/untreated)","hu":"Szőlőtörköly és borseprő (friss/kezeletlen)","cat":"Distillery byproducts","bg":118,"pct":0.55,"ch4":65,"ts":40},{"en":"Fruit pulp","hu":"Gyümölcstörköly","cat":"Distillery byproducts","bg":145,"pct":0.55,"ch4":80,"ts":20},{"en":"Fusel oils from alcoholic distillation","hu":"Alkoholos desztillációból származó kozmaolajok","cat":"Distillery byproducts","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Grain stillage from alcohol production","hu":"Alkoholgyártásból származó szeszmoslék < 10% TS","cat":"Distillery byproducts","bg":418,"pct":0.55,"ch4":230,"ts":87},{"en":"Maize syrup (final product, bioethanol)","hu":"Kukoricaszirup (bioetanol melléketermék)","cat":"Distillery byproducts","bg":882,"pct":0.68,"ch4":600,"ts":95},{"en":"Pot ale (Liquid remaining after the distillation of grain in the manufacture of whisky)","hu":"A whiskygyártás során a gabona lepárlása után visszamaradó folyadék","cat":"Distillery byproducts","bg":418,"pct":0.55,"ch4":230,"ts":87},{"en":"Potato stillage from alcohol production","hu":"Alkoholgyártásból származó burgonyahéj","cat":"Distillery byproducts","bg":136,"pct":0.55,"ch4":75,"ts":20},{"en":"Stillage from alcohol production (fruit origin)","hu":"Cefremoslék (gyümölcs alapú)","cat":"Distillery byproducts","bg":45,"pct":0.55,"ch4":25,"ts":6},{"en":"Technical corn oil from distillers grain","hu":"Lepárlásból származó technikai kukoricaplai","cat":"Distillery byproducts","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Transesterification residues","hu":"Átészterezési maradékok","cat":"Distillery byproducts","bg":145,"pct":0.55,"ch4":80,"ts":20},{"en":"Vinasse (sugar/alcohol)","hu":"Vinasz (cukor/szeszipari moslék)","cat":"Distillery byproducts","bg":64,"pct":0.55,"ch4":35,"ts":8},{"en":"WDGS, Corn fibre (bioethanol byproduct)","hu":"WDGS, Kukoricarost (bioetanol melléktermék)","cat":"Distillery byproducts","bg":882,"pct":0.68,"ch4":600,"ts":95},{"en":"Waste from non-alcoholic beer production","hu":"Alkoholmentes sörgyártásból származó hulladék","cat":"Distillery byproducts","bg":145,"pct":0.55,"ch4":80,"ts":20},{"en":"Waste slurry from the distillation of grain mixtures","hu":"Gabona keverékek desztillációjából származó hulladék iszap","cat":"Distillery byproducts","bg":33,"pct":0.55,"ch4":18,"ts":8},{"en":"Food waste","hu":"Élelmiszer-hulladék (moslék)","cat":"Food industry byproducts","bg":193,"pct":0.57,"ch4":110,"ts":25},{"en":"Olive pomace / olive mill waste","hu":"Olajbogyó-törköly","cat":"Food industry byproducts","bg":164,"pct":0.55,"ch4":90,"ts":40},{"en":"Pet food residue material (not qualified for use)","hu":"Kisállat takarmány maradék (petfood)","cat":"Food industry byproducts","bg":211,"pct":0.57,"ch4":120,"ts":30},{"en":"Petfood sorted-out","hu":"Selejt állateledel","cat":"Food industry byproducts","bg":211,"pct":0.57,"ch4":120,"ts":30},{"en":"Pressed sugar beet pulp","hu":"Préselt répaszelet","cat":"Food industry byproducts","bg":142,"pct":0.53,"ch4":75,"ts":24},{"en":"Wastefood material for animal livestock (meat origin)","hu":"Élelmiszeripari melléktermék (hús eredet)","cat":"Food industry byproducts","bg":211,"pct":0.57,"ch4":120,"ts":30},{"en":"Buttermilk fresh","hu":"Friss író","cat":"Dairy byproducts","bg":61,"pct":0.57,"ch4":35,"ts":12},{"en":"Casein, dry","hu":"Kasein száraz","cat":"Dairy byproducts","bg":105,"pct":0.57,"ch4":60,"ts":15},{"en":"Milk","hu":"Tej","cat":"Dairy byproducts","bg":61,"pct":0.57,"ch4":35,"ts":12},{"en":"Milk sludge","hu":"Tejipari szennyvíziszapok","cat":"Dairy byproducts","bg":61,"pct":0.57,"ch4":35,"ts":12},{"en":"Milk whey, fresh (20%)","hu":"Savó friss 20%","cat":"Dairy byproducts","bg":105,"pct":0.57,"ch4":60,"ts":15},{"en":"Milk whey, fresh (5% TS)","hu":"Savó friss 5 % TS","cat":"Dairy byproducts","bg":105,"pct":0.57,"ch4":60,"ts":15},{"en":"Milk whey, thickened (90% TS)","hu":"Tejsavó, konzerv  90% TS","cat":"Dairy byproducts","bg":105,"pct":0.57,"ch4":60,"ts":15},{"en":"Other dairy by-product","hu":"Egyéb tejipari melléktermék","cat":"Dairy byproducts","bg":105,"pct":0.57,"ch4":60,"ts":15},{"en":"Quark","hu":"Túró","cat":"Dairy byproducts","bg":105,"pct":0.57,"ch4":60,"ts":15},{"en":"Sour milk whey, fresh (<10%)","hu":"Savanyú savó frissen (<10%)","cat":"Dairy byproducts","bg":105,"pct":0.57,"ch4":60,"ts":15},{"en":"Sour whey, thickened (>10%)","hu":"Savanyú tejsavó besűrítve (10%<)","cat":"Dairy byproducts","bg":105,"pct":0.57,"ch4":60,"ts":15},{"en":"Waste oil from sewage sludge treatment","hu":"Szennyvíziszap kezeléséből származó fáradt olaj","cat":"Dairy byproducts","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Beet head & tail particles","hu":"Cukor Répa törmelék","cat":"Confectionery byproducts","bg":109,"pct":0.55,"ch4":60,"ts":20},{"en":"Molasses (sugar industry byproduct)","hu":"Melasz (Cukoripari melléktermék)","cat":"Confectionery byproducts","bg":545,"pct":0.55,"ch4":300,"ts":75},{"en":"Sugar beet betaine residue","hu":"cukorrépa betain maradék","cat":"Confectionery byproducts","bg":109,"pct":0.55,"ch4":60,"ts":20},{"en":"Sugar beet pulp","hu":"Cukorrépa préselt szelet (Cukoripari melléktermék)","cat":"Confectionery byproducts","bg":109,"pct":0.55,"ch4":60,"ts":20},{"en":"Bagasse","hu":"Kipréselt cukornád","cat":"Manufacturing industry byproducts","bg":283,"pct":0.6,"ch4":170,"ts":50},{"en":"Biofilter material","hu":"Biofilter","cat":"Manufacturing industry byproducts","bg":500,"pct":0.6,"ch4":300,"ts":85},{"en":"Brown grease","hu":"Barna zsír/zsírfogó zsír","cat":"Manufacturing industry byproducts","bg":1029,"pct":0.68,"ch4":700,"ts":95},{"en":"Brown liquor / spent sulphite liquor","hu":"Barnalúg / kiégett szulfitlúg","cat":"Manufacturing industry byproducts","bg":500,"pct":0.6,"ch4":300,"ts":85},{"en":"Cashew nut shell liquid (CNSL)","hu":"Kesudióhéj folyadék (CNSL)","cat":"Manufacturing industry byproducts","bg":0,"pct":0.6,"ch4":0,"ts":0},{"en":"Champost","hu":"Letermett gombakomposzt","cat":"Manufacturing industry byproducts","bg":500,"pct":0.6,"ch4":300,"ts":85},{"en":"Crude vegetable oil sediment","hu":"Növényi Olaj üledék/Viterra","cat":"Manufacturing industry byproducts","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Empty Palm Fruit Bunch (EFB)","hu":"Pálmatermés üres héja","cat":"Manufacturing industry byproducts","bg":500,"pct":0.6,"ch4":300,"ts":85},{"en":"Empty Palm Fruit Bunch (EFB) oil","hu":"Pálmaolajprés effluense","cat":"Manufacturing industry byproducts","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"FFA (free fatty acids)","hu":"FFA (szabad zsírsavak)","cat":"Manufacturing industry byproducts","bg":1029,"pct":0.68,"ch4":700,"ts":95},{"en":"Fat separator contents","hu":"Zsírszeparátor tartalma < 10% TS","cat":"Manufacturing industry byproducts","bg":1029,"pct":0.68,"ch4":700,"ts":95},{"en":"Flotate fats","hu":"Flotált zsírok","cat":"Manufacturing industry byproducts","bg":1029,"pct":0.68,"ch4":700,"ts":95},{"en":"Flotate sludge","hu":"Flotát iszap","cat":"Manufacturing industry byproducts","bg":50,"pct":0.6,"ch4":30,"ts":8},{"en":"Frying fats (category1)","hu":"Sütőzsírok (Kategória1)","cat":"Manufacturing industry byproducts","bg":1029,"pct":0.68,"ch4":700,"ts":95},{"en":"Frying fats (category2)","hu":"Sütőzsírok (Kategória2)","cat":"Manufacturing industry byproducts","bg":1029,"pct":0.68,"ch4":700,"ts":95},{"en":"Husk and shell","hu":"Háncs és héj","cat":"Manufacturing industry byproducts","bg":250,"pct":0.6,"ch4":150,"ts":88},{"en":"Lecithin, oil processing bottom tank residue after cleaning with water","hu":"Olajos tartályalj, lecitin","cat":"Manufacturing industry byproducts","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Palm oil mill effluent (POME) oil","hu":"Pálmaolaj malom effluent (POME)","cat":"Manufacturing industry byproducts","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Rapeseed meal","hu":"Repcemagliszt","cat":"Manufacturing industry byproducts","bg":383,"pct":0.6,"ch4":230,"ts":88},{"en":"Rapeseed residue (double counting)","hu":"repcemaradvány (kettős beszámítás)","cat":"Manufacturing industry byproducts","bg":383,"pct":0.6,"ch4":230,"ts":88},{"en":"Rapeseed residue (single counting)","hu":"repcemaradvány (egyszeres beszámítás)","cat":"Manufacturing industry byproducts","bg":383,"pct":0.6,"ch4":230,"ts":88},{"en":"Shells of nuts","hu":"Diófélék héja","cat":"Manufacturing industry byproducts","bg":500,"pct":0.6,"ch4":300,"ts":85},{"en":"Sunflower filtered waste material (liquid)","hu":"Nyálka","cat":"Manufacturing industry byproducts","bg":125,"pct":0.6,"ch4":75,"ts":25},{"en":"Used cooking oil sediment","hu":"Használt sütőolaj salak","cat":"Manufacturing industry byproducts","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Vegetable oil filter processing residue","hu":"Növényi olaj feldolg. szűrési maradék (Winteriszap derítőföld)","cat":"Manufacturing industry byproducts","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Rapeseed cake","hu":"Repcepogácsa","cat":"Manufacturing industry byproducts","bg":383,"pct":0.6,"ch4":230,"ts":88},{"en":"Animal blood","hu":"Állati vér","cat":"Slaughterhouse & meat processing byproducts","bg":97,"pct":0.62,"ch4":60,"ts":18},{"en":"Canning by-products","hu":"Konzervipari melléktermékek","cat":"Slaughterhouse & meat processing byproducts","bg":290,"pct":0.62,"ch4":180,"ts":35},{"en":"Fats of animal origin - classified in categories 1 and 2 in accordance with Regulation 1069/2009/EC","hu":"Állati eredetű zsírok - az 1069/2009/EK rendelettel összhangban az 1. és 2. kategóriába sorolt","cat":"Slaughterhouse & meat processing byproducts","bg":1029,"pct":0.68,"ch4":700,"ts":95},{"en":"Glycerine","hu":"Nyers glicerin","cat":"Slaughterhouse & meat processing byproducts","bg":290,"pct":0.62,"ch4":180,"ts":35},{"en":"Impurities recovered from crude glycerol during the refining process (MONG)","hu":"A nyers glicerinből a finomítási folyamat során visszanyert szennyeződések (MONG)","cat":"Slaughterhouse & meat processing byproducts","bg":565,"pct":0.62,"ch4":350,"ts":90},{"en":"Other meat industry by-products","hu":"Egyéb húsipari melléktermékek","cat":"Slaughterhouse & meat processing byproducts","bg":290,"pct":0.62,"ch4":180,"ts":35},{"en":"Other processing-industry by-products","hu":"Egyéb feldolgozóipari melléktermékek","cat":"Slaughterhouse & meat processing byproducts","bg":290,"pct":0.62,"ch4":180,"ts":35},{"en":"Poultry feather acid oil","hu":"Baromfi tollsavas olaj","cat":"Slaughterhouse & meat processing byproducts","bg":129,"pct":0.62,"ch4":80,"ts":40},{"en":"Refrigeration by-products","hu":"Hűtőipari melléktermékek","cat":"Slaughterhouse & meat processing byproducts","bg":290,"pct":0.62,"ch4":180,"ts":35},{"en":"Rumen contents","hu":"Bendő tartalma","cat":"Slaughterhouse & meat processing byproducts","bg":89,"pct":0.62,"ch4":55,"ts":15},{"en":"Sterilised slaughterhouse waste material","hu":"Sterilizált vágóhídi melléktermék","cat":"Slaughterhouse & meat processing byproducts","bg":290,"pct":0.62,"ch4":180,"ts":35},{"en":"Stomach contents (pig)","hu":"Gyomortartalom (sertés)","cat":"Slaughterhouse & meat processing byproducts","bg":97,"pct":0.62,"ch4":60,"ts":25},{"en":"Stomach milk fresh (no longer suitable for consumption)","hu":"Gyomortej frissen (fogyasztásra már nem alkalmas)","cat":"Slaughterhouse & meat processing byproducts","bg":56,"pct":0.62,"ch4":35,"ts":12},{"en":"Cattle slurry","hu":"Szarvasmarha almos / hígtrágya","cat":"Animal manure","bg":20,"pct":0.55,"ch4":11,"ts":8},{"en":"Pig slurry","hu":"Sertés hígtrágya","cat":"Animal manure","bg":16,"pct":0.55,"ch4":9,"ts":8},{"en":"Poultry slurry","hu":"Baromfi hígtrágya","cat":"Animal manure","bg":33,"pct":0.55,"ch4":18,"ts":8},{"en":"Solid cattle manure","hu":"Szilárd marhatrágya","cat":"Animal manure","bg":55,"pct":0.55,"ch4":30,"ts":18},{"en":"Solid horse manure","hu":"Lótrágya","cat":"Animal manure","bg":51,"pct":0.55,"ch4":28,"ts":18},{"en":"Solid pig manure","hu":"Szilárd sertéstrágya","cat":"Animal manure","bg":62,"pct":0.55,"ch4":34,"ts":18},{"en":"Solid poultry manure","hu":"Baromfi száraz trágya","cat":"Animal manure","bg":91,"pct":0.55,"ch4":50,"ts":18},{"en":"Solid rabbit manure","hu":"Nyúl száraz trágya","cat":"Animal manure","bg":73,"pct":0.55,"ch4":40,"ts":18},{"en":"Solid sheep and goat manure","hu":"Juh- és kecsketrágya","cat":"Animal manure","bg":58,"pct":0.55,"ch4":32,"ts":18},{"en":"Solid turkey manure","hu":"Pulykatrágya","cat":"Animal manure","bg":91,"pct":0.55,"ch4":50,"ts":18},{"en":"Algae grown on land in ponds or photobioreactors","hu":"Földterületen tavakban vagy fotobioreaktorban termesztett algák","cat":"Green waste","bg":283,"pct":0.53,"ch4":150,"ts":20},{"en":"City park grass","hu":"Városi zöldhulladék, fű","cat":"Green waste","bg":170,"pct":0.53,"ch4":90,"ts":35},{"en":"Cut flowers","hu":"Vágott virágok","cat":"Green waste","bg":142,"pct":0.53,"ch4":75,"ts":25},{"en":"Flower strips, flower meadows, nature reserves, field margins, Sage thistle meadows","hu":"Mezei virágok","cat":"Green waste","bg":142,"pct":0.53,"ch4":75,"ts":25},{"en":"Green waste from garden and park maintenance","hu":"Kert- és parkfenntartásból származó zöldhulladék","cat":"Green waste","bg":170,"pct":0.53,"ch4":90,"ts":35},{"en":"Landscape mowing material, including turf grass","hu":"Tájképi kaszálási anyag, beleértve a gyepfűvet is","cat":"Green waste","bg":170,"pct":0.53,"ch4":90,"ts":35},{"en":"Medicinal and spice plants","hu":"Gyógy- és fűszernövények","cat":"Green waste","bg":151,"pct":0.53,"ch4":80,"ts":35},{"en":"Organic municipal solid waste (biomass portion only)","hu":"Szerves települési zöldhulladék","cat":"Green waste","bg":151,"pct":0.53,"ch4":80,"ts":35},{"en":"Raw methanol from kraft pulping stemming from the production of wood pulp","hu":"Fapépgyártásból származó nátroncellulóz-gyártásból származó nyers metanol","cat":"Green waste","bg":735,"pct":0.68,"ch4":500,"ts":90},{"en":"Waste wood","hu":"Fakéreg, ágak, hulladékfa, levelek, fűrészpor, faforgács","cat":"Green waste","bg":0,"pct":0.53,"ch4":0,"ts":60},{"en":"Biogenic fraction of end-of-life tyres","hu":"Az elhasználódott gumiabroncsok biogén frakciója","cat":"Other","bg":0,"pct":0.55,"ch4":0,"ts":30},{"en":"Dextrose hydrolysate","hu":"Dextróz hidrolizátum","cat":"Other","bg":182,"pct":0.55,"ch4":100,"ts":30},{"en":"Ethanol used in the cleaning/extraction of blood plasma","hu":"A vérplazma tisztításához/kivonásához használt etanol","cat":"Other","bg":109,"pct":0.55,"ch4":60,"ts":18},{"en":"Ethanol used in the extraction of ingredients from medicinal plants","hu":"Gyógynövényekből összetevők kivonásához használt etanol","cat":"Other","bg":882,"pct":0.68,"ch4":600,"ts":95},{"en":"Municipal Solid Waste (MSW)","hu":"Települési szilárd szerves hulladék (MOHU begyűjtés)","cat":"Other","bg":182,"pct":0.55,"ch4":100,"ts":35},{"en":"Municipal wastewater and derivatives other than sewage sludge","hu":"Települési szennyvíz és származékai a szennyvíziszap kivételével","cat":"Other","bg":22,"pct":0.55,"ch4":12,"ts":3},{"en":"Organic waste and similar waste flows from trade, services and companies (bio-waste from trade, services and companies)","hu":"A kereskedelemből, szolgáltatásokból és cégekből származó szerves hulladék és hasonló hulladék (biohulladék a kereskedelemből, a szolgáltatásokból és a vállalatokból)","cat":"Other","bg":182,"pct":0.55,"ch4":100,"ts":28},{"en":"Out-of-shelf-life disinfectant","hu":"Lejárt a szavatossági idejű fertőtlenítőszer","cat":"Other","bg":0,"pct":0.55,"ch4":0,"ts":0},{"en":"Residual lignocellulosic material","hu":"Lignocellulózos maradék","cat":"Other","bg":231,"pct":0.52,"ch4":120,"ts":60},{"en":"Residue of FAME final distillation","hu":"A FAME végdesztillációjának maradéka","cat":"Other","bg":182,"pct":0.55,"ch4":100,"ts":30},{"en":"Sewage sludge","hu":"Szennyvíziszap","cat":"Other","bg":20,"pct":0.6,"ch4":12,"ts":5},{"en":"Soapstock acid oil contaminated with sulphur","hu":"Kénnel szennyezett szappansav olaj","cat":"Other","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Spent bleaching earth","hu":"Elhasznált fehérítőföld","cat":"Other","bg":182,"pct":0.55,"ch4":100,"ts":30},{"en":"Spent bleaching earth oil (SBEO)","hu":"Elhasznált fehérítőföld olaj","cat":"Other","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Tall oil","hu":"Tallolaj","cat":"Other","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Tall oil pitch","hu":"Tallolajszurok","cat":"Other","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Unrefined liquid dextrose ultrafiltrationretentate","hu":"Finomítatlan folyékony dextróz ultraszűrő retentátum","cat":"Other","bg":182,"pct":0.55,"ch4":100,"ts":30},{"en":"Waste starch slurry","hu":"Hulladék keményítőiszap","cat":"Other","bg":33,"pct":0.55,"ch4":18,"ts":8},{"en":"Wastewater from ship transport","hu":"Hajószállítás szennyvizei","cat":"Other","bg":22,"pct":0.55,"ch4":12,"ts":3},{"en":"Wastewater from the food industry","hu":"Élelmiszeriparipar szennyvizei","cat":"Other","bg":22,"pct":0.55,"ch4":12,"ts":3},{"en":"Wastewater from the paper- and cardboard industry","hu":"Papír- és kartonipar szennyvizei","cat":"Other","bg":22,"pct":0.55,"ch4":12,"ts":3},{"en":"Barley husk","hu":"Árpahéj","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":88},{"en":"Beet leaves with beet ingredients","hu":"Cukorrépalevél cukorrépa összetevőkkel","cat":"Feed waste","bg":113,"pct":0.53,"ch4":60,"ts":20},{"en":"Bran","hu":"Korpa","cat":"Feed waste","bg":453,"pct":0.53,"ch4":240,"ts":87},{"en":"By-products of fruit cultivation","hu":"Gyümölcstermesztés melléktermékei","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"By-products of vegetable cultivation","hu":"Zöldségtermesztés melléktermékei","cat":"Feed waste","bg":109,"pct":0.53,"ch4":58,"ts":12},{"en":"Corn cob mix","hu":"Lemorzsolt kukoricacső","cat":"Feed waste","bg":434,"pct":0.53,"ch4":230,"ts":55},{"en":"Corn kernels (if too dry bacterias cant process)","hu":"Kukorica törtszem","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Corn silage","hu":"Kukoricaszilázs","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Corn stalk","hu":"Kukoricaszár","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Crops grown on severely degraded land excluding food and feed crops and feedstocks listed in Part A of this Annex, where not used for the production of biofuel for the aviation sector","hu":"Súlyosan leromlott talajon termesztett növények, kivéve az élelmiszer- és takarmánynövényeket és az e Annex IX A. részében felsorolt alapanyagok, ha nem használják fel bioüzemanyag a repülési ágazat számára","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Crops grown on severely degraded land, except food and feed crops, where used for the production of biofuel for the aviation sector;","hu":"Súlyosan leromlott területeken termesztett növények, kivéve az élelmiszer- és takarmánynövények, amelyeket a légiközlekedési ágazat számára bioüzemanyag előállítására használnak fel","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Cyanobacteria","hu":"Cianobaktériumok","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Damaged crops that are not fit for use in the food or feed chain, excluding substances that have been intentionally modified or contaminated in order to meet this definition","hu":"Az élelmiszer- vagy takarmányláncban való felhasználásra alkalmatlan, sérült növények, kivéve olyan anyagok, amelyeket szándékosan módosítottak vagy szennyeztek annak érdekében, hogy megfeleljenek ennek a meghatározásnak","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Fodder beet leaves","hu":"","cat":"Feed waste","bg":113,"pct":0.53,"ch4":60,"ts":20},{"en":"Grain dust","hu":"Gabona léha","cat":"Feed waste","bg":434,"pct":0.53,"ch4":230,"ts":87},{"en":"Grain waste","hu":"Gabonahulladék","cat":"Feed waste","bg":434,"pct":0.53,"ch4":230,"ts":87},{"en":"Intermediate crops, such as catch crops and cover crops that are grown in areas where due to a short vegetation period the production of food and feed crops is limited to one harvest and provided their use does not trigger demand for additional land, and provided the soil organic matter content is maintained, where used for the production of biofuel for the aviation sector;","hu":"Olyan köztes termények, amelyeket olyan területen termesztenek, ahol a rövid vegetációs időszak miatt az élelmiszer- és takarmánynövények termesztése egy betakarításra korlátozódik, és felhasználásuk nem vált ki további földigényt, és a talaj szervesanyag-tartalma megmarad, illetve a légiközlekedési ágazat számára bioüzemanyag előállítására használják","cat":"Feed waste","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Intermediate crops, such as catch crops and cover crops, and excluding feedstocks listed in Part A of this Annex, that are grown in areas where due to a short vegetation period the production of food and feed crops is limited to one harvest and provided their use does not trigger demand for additional land and provided the soil organic matter content is maintained, where not used for the production of biofuel for the aviation sector","hu":"Olyan köztes termények, kivéve az Annex IX A. részében felsorolt alapanyagok, amelyeket olyan területeken termesztenek, ahol rövid vegetációs időszak az élelmiszer-és takarmánynövények termelése egy betakarításra korlátozódik, és feltéve, hogy használatuk nem vált ki további földigényt, és a talaj szervesanyag- tartalma megmarad, és nem használják fel bioüzemanyag előállítására a légiközlekedési ágazatban","cat":"Feed waste","bg":882,"pct":0.68,"ch4":600,"ts":90},{"en":"Lawn hay","hu":"Fűszenázs","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Other by-product from arable land","hu":"Egyéb melléktermék szántóföldről","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Other cultivated plant","hu":"Egyéb termesztett növény","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Other mill industry by-product","hu":"Egyéb malomipari melléktermék","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Other silage, hay","hu":"Egyéb szilázs, szenázs","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Sorghum silage","hu":"Cirokszilázs","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":40},{"en":"Soybean","hu":"Szójabab","cat":"Feed waste","bg":566,"pct":0.53,"ch4":300,"ts":88},{"en":"Straw","hu":"Szalma","cat":"Feed waste","bg":340,"pct":0.53,"ch4":180,"ts":86},{"en":"Sunflower husk grain","hu":"Napraforgó maghéj, dara","cat":"Feed waste","bg":283,"pct":0.53,"ch4":150,"ts":88},{"en":"Water-rich stream originating from the processing of soybeans (velasse)","hu":"A szójabab feldolgozásából származó vízben gazdag anyag (velase)","cat":"Feed waste","bg":23,"pct":0.53,"ch4":12,"ts":3}];
+// RED III Annex VI absolute biomethane table (g CO2eq/MJ): feedstock -> option -> [typical, default]
+const RED = {
+ "Wet manure":{"open|nc":[-20,22],"open|c":[-35,1],"closed|nc":[-88,-79],"closed|c":[-103,-100]},
+ "Maize":{"open|nc":[58,73],"open|c":[43,52],"closed|nc":[41,51],"closed|c":[26,30]},
+ "Biowaste":{"open|nc":[51,71],"open|c":[36,50],"closed|nc":[25,35],"closed|c":[10,14]}
+};
+const OPEN_STORAGE = {"Wet manure":69.56,"Biowaste":21.82,"Maize":13.51};
+const LHV=35.8, GRID_EF=0.31, COMPRESS=0.10, ELEC_SPEC=0.40, HEAT_PCT=0.10, FOSSIL=94, GWP_CH4=28, CH4_DENS=0.717;
+const MANURE=new Set(DB.filter(d=>d.cat==="Animal manure").map(d=>d.en));
+const BIOWASTE=new Set(DB.filter(d=>d.cat==="Green waste"||/MSW|Food waste|Bio-waste/i.test(d.en)).map(d=>d.en));
+const MODES={"Truck 40t (diesel)":[0.88,0.0879,25],"Truck 28t (diesel)":[1.05,0.0879,16],
+ "Tractor+trailer (diesel)":[1.80,0.0879,18],"Slurry tanker (diesel)":[1.20,0.0879,25],
+ "Van (diesel)":[2.50,0.0879,3],"Truck 40t (CNG/bio)":[0.95,0.0100,25],"Rail (electric)":[0.20,0.0861,1000],
+ "Pipeline (on-site)":[0.10,0.0861,99999],"On-site (0 km)":[0,0,99999]};
+const ELEC=[["Hungary grid",0.31,100],["On-site solar PV (off-grid)",0,0],["On-site wind (off-grid)",0,0],["Biogas CHP on-site",0,0],["PPA / GO (renewable)",0,0],["Grid green tariff (GO)",0,0]];
+const HEAT=[["Own biogas CHP waste heat",0,100],["Own biogas boiler",0,0],["Natural gas",0.0663,0],["Wood chips",0.0118,0],["Grid / district heat",0.05,0]];
+
+const CATS=["Bakery byproducts","Vegetable byproducts","Distillery byproducts","Food industry byproducts","Dairy byproducts","Confectionery byproducts","Manufacturing industry byproducts","Slaughterhouse & meat processing byproducts","Animal manure","Green waste","Other","Feed waste"];
+const CAT_HU={"Bakery byproducts":"Pékipari melléktermékek","Vegetable byproducts":"Zöldség melléktermékek","Distillery byproducts":"Szeszipari melléktermékek","Food industry byproducts":"Élelmiszeripari melléktermékek","Dairy byproducts":"Tejipari melléktermékek","Confectionery byproducts":"Édesipari melléktermékek","Manufacturing industry byproducts":"Gyártási melléktermékek","Slaughterhouse & meat processing byproducts":"Vágóhídi melléktermékek","Animal manure":"Állati trágya","Green waste":"Zöldhulladék","Other":"Egyéb","Feed waste":"Takarmányhulladék"};
+
+const state={}; // en -> {mass,dist,mode,bg,ts,pct}
+const DBMAP={}; DB.forEach(d=>DBMAP[d.en]=d);
+const fbody=document.getElementById("fbody");
+function modeOptions(sel){return Object.keys(MODES).map(m=>`<option ${m===sel?"selected":""}>${m}</option>`).join("");}
+function buildTable(filter=""){
+  fbody.innerHTML="";
+  CATS.forEach(cat=>{
+    const items=DB.filter(d=>d.cat===cat && (filter===""||d.en.toLowerCase().includes(filter)));
+    if(!items.length)return;
+    const ctr=document.createElement("tr");ctr.className="cat";
+    ctr.innerHTML=`<td colspan="10">${cat}</td>`;fbody.appendChild(ctr);
+    items.forEach(d=>{
+      const s=state[d.en]||{mass:0,dist:0,mode:"Truck 40t (diesel)"};
+      const bgv=(s.bg!==undefined&&s.bg!=="")?s.bg:d.bg;
+      const tsv=(s.ts!==undefined&&s.ts!=="")?s.ts:d.ts;
+      const pctv=(s.pct!==undefined&&s.pct!=="")?s.pct:Math.round(d.pct*100);
+      const tr=document.createElement("tr");
+      tr.innerHTML=`<td class="en">${d.en}</td>
+        <td class="bgm"><input type="number" min="0" step="1" value="${bgv}" data-en="${d.en}" data-k="bg"></td>
+        <td class="pct"><input type="number" min="0" max="100" step="1" value="${pctv}" data-en="${d.en}" data-k="pct"></td>
+        <td class="ts"><input type="number" min="0" max="100" step="0.1" value="${tsv}" data-en="${d.en}" data-k="ts"></td>
+        <td class="mass"><input type="number" min="0" step="100" value="${s.mass||""}" data-en="${d.en}" data-k="mass" placeholder="0"></td>
+        <td class="dist"><input type="number" min="0" step="1" value="${s.dist||""}" data-en="${d.en}" data-k="dist" placeholder="0"></td>
+        <td class="mode"><select data-en="${d.en}" data-k="mode">${modeOptions(s.mode)}</select></td>
+        <td class="out" data-bgy="${d.en}">0</td>
+        <td class="out" data-ch4y="${d.en}">0</td>
+        <td class="out" data-out="${d.en}">0.000</td>`;
+      fbody.appendChild(tr);
+    });
+  });
+  fbody.querySelectorAll("input,select").forEach(el=>el.addEventListener("input",onInput));
+}
+function onInput(e){
+  const en=e.target.dataset.en,k=e.target.dataset.k;
+  if(!state[en])state[en]={mass:0,dist:0,mode:"Truck 40t (diesel)"};
+  state[en][k]= k==="mode"? e.target.value : (e.target.value===""?"":(parseFloat(e.target.value)||0));
+  compute();
+}
+function buildEnergy(){
+  document.getElementById("elecsrc").innerHTML=ELEC.map((s,i)=>
+    `<div class="srcrow"><span>${s[0]}</span><input type="number" min="0" max="100" value="${s[2]}" data-el="${i}"></div>`).join("");
+  document.getElementById("heatsrc").innerHTML=HEAT.map((s,i)=>
+    `<div class="srcrow"><span>${s[0]}</span><input type="number" min="0" max="100" value="${s[2]}" data-ht="${i}"></div>`).join("");
+  document.querySelectorAll("[data-el],[data-ht]").forEach(el=>el.addEventListener("input",compute));
+}
+function fmt(x,d=2){return (isFinite(x)?x:0).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});}
+function nf(x,d=0){return (isFinite(x)?x:0).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+// ---------------------------------------------------------------------------
+// gatherInputs(): read all UI inputs into a plain object (server-portable I/O)
+// ---------------------------------------------------------------------------
+function gatherInputs(){
+  const feedstocks=[];
+  DB.forEach(d=>{
+    const s=state[d.en];
+    if(!s||!s.mass)return;
+    feedstocks.push({
+      en:d.en, cat:d.cat,
+      mass:s.mass,
+      dist:s.dist||0,
+      mode:s.mode||"Truck 40t (diesel)",
+      bg:(s.bg!==undefined&&s.bg!==""&&!isNaN(s.bg))?s.bg:d.bg,
+      pct:(s.pct!==undefined&&s.pct!==""&&!isNaN(s.pct))?s.pct/100:d.pct,
+      ts:(s.ts!==undefined&&s.ts!=="")?s.ts:d.ts
+    });
+  });
+  const elecMix=ELEC.map((a,i)=>{const el=document.querySelector('[data-el="'+i+'"]');return {name:a[0],ef:a[1],pct:el?parseFloat(el.value)||0:a[2]};});
+  const heatMix=HEAT.map((a,i)=>{const el=document.querySelector('[data-ht="'+i+'"]');return {name:a[0],ef:a[1],pct:el?parseFloat(el.value)||0:a[2]};});
+  return {
+    feedstocks, elecMix, heatMix,
+    enduse:document.getElementById("enduse").value,
+    vtype:document.getElementById("vtype").value,
+    dig:document.getElementById("dig").value,
+    offgas:document.getElementById("offgas").value==="combusted"?"c":"nc",
+    ccsMode:document.getElementById("ccsmode").value,
+    ccsVal:parseFloat(document.getElementById("ccsval").value)||0,
+    ophours:Math.max(1,parseFloat(document.getElementById("ophours").value)||8000),
+    ttf:parseFloat(document.getElementById("ttf").value)||0
+  };
+}
+
+// ---------------------------------------------------------------------------
+// calcGHG(inp): PURE calculation engine — RED III Annex VI. No DOM access.
+// This is the function that moves server-side in Phase 3.
+// ---------------------------------------------------------------------------
+function calcGHG(inp){
+  let totCH4=0, totBiogas=0, manureCH4=0, biowasteCH4=0, etd_kg=0;
+  const per=[];
+  inp.feedstocks.forEach(f=>{
+    const ch4PerT=f.bg*f.pct;
+    const ch4=f.mass*ch4PerT, bg=f.mass*f.bg;
+    totCH4+=ch4; totBiogas+=bg;
+    if(MANURE.has(f.en))manureCH4+=ch4;
+    if(BIOWASTE.has(f.en))biowasteCH4+=ch4;
+    const m=MODES[f.mode]||[0.88,0.0879,25];
+    const e_kg=f.mass*(f.dist||0)*m[0]*m[1];
+    etd_kg+=e_kg;
+    per.push({en:f.en,cat:f.cat,mass:f.mass,bgPerT:f.bg,pct:f.pct,ch4PerT:ch4PerT,
+      biogasYr:bg,ch4Yr:ch4,energyGWh:ch4*LHV/3.6e6,mode:f.mode,dist:f.dist||0,etd_kg:e_kg});
+  });
+  const EMJ=totCH4*LHV, GWh=EMJ/3.6e6;
+  const ccs=inp.ccsMode==="on"?inp.ccsVal:0;
+  const mS=totCH4>0?manureCH4/totCH4:0, bS=totCH4>0?biowasteCH4/totCH4:0;
+  const nfeed=inp.feedstocks.length;
+  let det,detName;
+  if(totCH4===0){det="(no feedstock yet)";detName=null;}
+  else if(mS>=0.999){det="Wet manure";detName="Wet manure";}
+  else if(bS>=0.999){det="Biowaste";detName="Biowaste";}
+  else if(nfeed<=1){det="Single feedstock (no default)";detName=null;}
+  else {det="MIXTURE";detName=null;}
+  function wEF(mix){let tot=0,w=0;mix.forEach(s=>{tot+=s.pct;w+=s.pct*s.ef;});return{ef:tot>0?w/tot:0,sum:tot};}
+  const elecEF=wEF(inp.elecMix), heatEF=wEF(inp.heatMix);
+  let E=0, pathway, terms, defaultValue=null, defaultKey=null;
+  let ep=0, ep_break=null, etd=0, esca=0;
+  if(detName && RED[detName]){
+    pathway="default";
+    defaultKey=(inp.dig==="closed"?"closed":"open")+"|"+inp.offgas;
+    const v=RED[detName][defaultKey];
+    defaultValue=(inp.vtype==="typical"?v[0]:v[1]);
+    E=defaultValue - ccs;
+    terms={Eec:0,El:0,Ep:0,Etd:0,Eu:0,Esca:0,Eccs:-ccs};
+  } else {
+    pathway="actual";
+    ep_break={slip:0,electricity:0,heat:0,compression:0,openStorage:0};
+    if(EMJ>0){
+      ep_break.slip=(0.01*totCH4*CH4_DENS*GWP_CH4*1000)/EMJ;
+      ep_break.electricity=(totCH4*ELEC_SPEC*elecEF.ef*1000)/EMJ;
+      ep_break.heat=(HEAT_PCT*EMJ*heatEF.ef*1000)/EMJ;
+      if(inp.enduse!=="LNG")ep_break.compression=(totCH4*COMPRESS*GRID_EF*1000)/EMJ;
+      if(inp.dig==="open")ep_break.openStorage=OPEN_STORAGE[mS>=bS?"Wet manure":"Biowaste"];
+    }
+    ep=ep_break.slip+ep_break.electricity+ep_break.heat+ep_break.compression+ep_break.openStorage;
+    etd=EMJ>0?(etd_kg*1000)/EMJ:0;
+    esca=45*mS;
+    E=ep+etd-esca-ccs;
+    terms={Eec:0,El:0,Ep:ep,Etd:etd,Eu:0,Esca:-esca,Eccs:-ccs};
+  }
+  const saving=totCH4>0?(FOSSIL-E)/FOSSIL*100:0;
+  const oph=inp.ophours;
+  const premium=E>=0?45:45+(-E/100)*50;
+  const price=inp.ttf+premium;
+  const MWh=EMJ/3600, revenue=price*MWh;
+  return {totCH4,totBiogas,manureCH4,biowasteCH4,EMJ,GWh,MWh,
+    manureShare:mS,biowasteShare:bS,nfeed,det,detName,pathway,
+    elecEF:elecEF.ef,heatEF:heatEF.ef,elecSum:elecEF.sum,heatSum:heatEF.sum,
+    ccs,terms,defaultValue,defaultKey,ep,ep_break,etd,esca,
+    E,saving,premium,price,revenue,oph,per,
+    biogasH:totBiogas/oph,ch4H:totCH4/oph,avgMW:EMJ/oph/3600};
+}
+
+// ---------------------------------------------------------------------------
+// compute(): live UI update, driven by the pure engine above
+// ---------------------------------------------------------------------------
+function compute(){
+  const inp=gatherInputs();
+  const r=calcGHG(inp);
+  DB.forEach(d=>{
+    const cell=document.querySelector('[data-out="'+CSS.escape(d.en)+'"]');
+    const cBgy=document.querySelector('[data-bgy="'+CSS.escape(d.en)+'"]');
+    const cCh4y=document.querySelector('[data-ch4y="'+CSS.escape(d.en)+'"]');
+    const p=r.per.find(x=>x.en===d.en);
+    if(!p){if(cell)cell.textContent="0.000";if(cBgy)cBgy.textContent="0";if(cCh4y)cCh4y.textContent="0";return;}
+    if(cBgy)cBgy.textContent=Math.round(p.biogasYr).toLocaleString("en-US");
+    if(cCh4y)cCh4y.textContent=Math.round(p.ch4Yr).toLocaleString("en-US");
+    if(cell)cell.textContent=fmt(p.energyGWh,3);
+  });
+  document.getElementById("kBiogas").textContent=Math.round(r.totBiogas).toLocaleString("en-US");
+  document.getElementById("kCH4").textContent=Math.round(r.totCH4).toLocaleString("en-US");
+  document.getElementById("kGWh").textContent=fmt(r.GWh,2);
+  document.getElementById("kBiogasH").textContent=Math.round(r.biogasH).toLocaleString("en-US");
+  document.getElementById("kCH4H").textContent=Math.round(r.ch4H).toLocaleString("en-US");
+  document.getElementById("kMWh").textContent=fmt(r.avgMW,2);
+  document.getElementById("elecsum").textContent="Σ "+r.elecSum+"%";
+  document.getElementById("heatsum").textContent="Σ "+r.heatSum+"%";
+  document.getElementById("E").textContent=fmt(r.E,1);
+  document.getElementById("E").style.color=r.E<0?"#7CDBA8":"#fff";
+  document.getElementById("save").textContent=r.totCH4>0?Math.round(r.saving)+"%":"—";
+  document.getElementById("kPrem").textContent=r.totCH4>0?fmt(r.premium,1):"—";
+  document.getElementById("kPrice").textContent=r.totCH4>0?fmt(r.price,1):"—";
+  document.getElementById("kRev").textContent=r.totCH4>0?Math.round(r.revenue).toLocaleString("en-US"):"—";
+  document.getElementById("det").textContent=r.det;
+  let msg="";
+  if(r.totCH4===0)msg="Enter feedstock tonnage to see the result.";
+  else if(r.det==="MIXTURE")msg="Mixture — no pure default; actual calculation (energy-share) used.";
+  else if(r.det==="Single feedstock (no default)")msg="No RED III default for this feedstock; actual calculation used.";
+  else msg="100% "+r.det+" → default valid.";
+  document.getElementById("check").textContent=msg;
+  drawChart(r);
+}
+
+// ---- emissions column chart ----
+function drawChart(r){
+  let cols;
+  if(r.pathway==="default"){
+    cols=[{n:"Eec",v:0},{n:"El",v:0},{n:"Ep",v:0},{n:"Etd",v:0},{n:"Eu",v:0},
+      {n:"Esca",v:0},{n:"RED III\ndefault",v:r.defaultValue},{n:"Eccs/\nEccr",v:r.terms.Eccs}];
+  } else {
+    cols=[{n:"Eec",v:r.terms.Eec},{n:"Ep",v:r.terms.Ep},{n:"Etd",v:r.terms.Etd},
+      {n:"Esca",v:r.terms.Esca},{n:"Eccs/\nEccr",v:r.terms.Eccs}];
+  }
+  cols.push({n:"TOTAL E",v:r.E,total:true});
+  const YMIN=-100, YMAX=32.9, RANGE=YMAX-YMIN;
+  const W=Math.max(640, cols.length*92), H=360, padL=54, padR=14, padT=18, padB=64;
+  const plotH=H-padT-padB, plotW=W-padL-padR;
+  const yOf=v=> padT + (YMAX - v)/RANGE*plotH;
+  const y0=yOf(0);
+  const bw=Math.min(58, plotW/cols.length*0.62);
+  const step=plotW/cols.length;
+  const ticks=[-100,-75,-50,-25,0,25];
+  let g="";
+  ticks.forEach(t=>{
+    const y=yOf(t);
+    g+=`<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}" stroke="${t===0?'#9aa7ad':'#eef2f3'}" stroke-width="${t===0?1.4:1}"/>`;
+    g+=`<text x="${padL-8}" y="${(y+3).toFixed(1)}" text-anchor="end" font-size="10" fill="#7c7c7c">${t}</text>`;
+  });
+  g+=`<text x="14" y="${padT+plotH/2}" text-anchor="middle" font-size="10" fill="#7c7c7c" transform="rotate(-90 14 ${padT+plotH/2})">g CO₂eq / MJ</text>`;
+  cols.forEach((c,i)=>{
+    const cx=padL + step*i + step/2;
+    const v=Math.max(YMIN,Math.min(YMAX,c.v));
+    const yv=yOf(v);
+    const top=Math.min(yv,y0), bh=Math.abs(yv-y0);
+    const fill=c.total? "#13323A" : (c.v<0? "#2E7D55" : "#9AA7AD");
+    g+=`<rect x="${(cx-bw/2).toFixed(1)}" y="${top.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(0.5,bh).toFixed(1)}" rx="2" fill="${fill}"/>`;
+    const ly = c.v>=0? (top-4) : (y0+12);
+    g+=`<text x="${cx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" font-size="10" font-weight="700" fill="${c.total?'#13323A':(c.v<0?'#fff':'#46606A')}">${fmt(c.v,1)}</text>`;
+    const parts=String(c.n).split("\n");
+    parts.forEach((p,pi)=>{
+      g+=`<text x="${cx.toFixed(1)}" y="${(H-padB+16+pi*11).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="${c.total?700:600}" fill="${c.total?'#13323A':'#46606A'}">${p}</text>`;
+    });
+  });
+  document.getElementById("chart").innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" style="max-width:${W}px;display:block;margin:0 auto;font-family:inherit;">${g}</svg>`;
+}
+
+// ===========================================================================
+// AUDIT-READY REPORT GENERATOR (Phase 1 deliverable)
+// buildReportHTML(inp,r,meta) returns a complete, self-contained HTML document.
+// Structured as a pure function so generation can move server-side (Phase 3).
+// ===========================================================================
+function pad2(n){return String(n).padStart(2,"0");}
+function makeReportId(d){
+  const rnd=Math.random().toString(36).slice(2,6).toUpperCase();
+  return "DCB-GHG-"+d.getFullYear()+pad2(d.getMonth()+1)+pad2(d.getDate())+"-"+rnd;
+}
+function gatherMeta(){
+  const d=new Date();
+  const g=id=>{const v=(document.getElementById(id).value||"").trim();return v||"—";};
+  return {plantName:g("plantName"),operator:g("operator"),location:g("location"),
+    period:g("period"),reportId:makeReportId(d),date:d.toISOString().slice(0,10)};
+}
+const LOGO="https://cdn.prod.website-files.com/68bd30984b2e2994dfa84953/6a216bcfa4f8e4b053f9f3d0_logo%20al%C3%A1%C3%ADr%C3%A1shoz.png";
+
+function buildReportHTML(inp,r,meta){
+  const plant=esc(meta.plantName);
+  const wm=esc(meta.plantName==="—"?"DeCarbon Energy":meta.plantName)+" · not transferable";
+  const valLabel=inp.vtype==="typical"?"typical":"default";
+  const pathwayLabel=r.pathway==="default"?"RED III Annex VI default value":"Actual calculation (energy-share)";
+  const eColor=r.E<0?"#2E7D55":"#13323A";
+
+  // feedstock inventory rows
+  let sumMass=0,sumBgy=0,sumCh4y=0,sumGWh=0;
+  const feedRows=r.per.map(p=>{sumMass+=p.mass;sumBgy+=p.biogasYr;sumCh4y+=p.ch4Yr;sumGWh+=p.energyGWh;
+    return `<tr><td class="l">${esc(p.en)}</td><td class="r">${nf(p.mass,0)}</td><td class="r">${nf(p.bgPerT,0)}</td>`+
+      `<td class="r">${nf(p.pct*100,0)}%</td><td class="r">${nf(p.biogasYr,0)}</td><td class="r">${nf(p.ch4Yr,0)}</td>`+
+      `<td class="r">${nf(p.energyGWh,3)}</td><td class="l">${esc(p.mode)}</td><td class="r">${nf(p.dist,0)}</td></tr>`;}).join("")
+    || `<tr><td class="l" colspan="9">No feedstock entered.</td></tr>`;
+  const feedTot=`<tr class="tot"><td class="l">TOTAL</td><td class="r">${nf(sumMass,0)}</td><td></td><td></td>`+
+    `<td class="r">${nf(sumBgy,0)}</td><td class="r">${nf(sumCh4y,0)}</td><td class="r">${nf(sumGWh,3)}</td><td></td><td></td></tr>`;
+
+  // energy mix rows
+  const eRows=(mix)=>{const used=mix.filter(s=>s.pct>0);
+    if(!used.length)return `<tr><td class="l" colspan="3">— none specified —</td></tr>`;
+    return used.map(s=>`<tr><td class="l">${esc(s.name)}</td><td class="r">${nf(s.pct,0)}%</td><td class="r">${nf(s.ef,4)}</td></tr>`).join("");};
+
+  // itemized emissions rows
+  let emRows;
+  if(r.pathway==="default"){
+    const sl={"closed":"Closed","open":"Open"}[inp.dig]||"Open";
+    const og=inp.offgas==="c"?"off-gas combusted":"off-gas not combusted";
+    emRows=
+      `<tr><td class="l">RED III Annex VI default — ${esc(r.detName)} (${sl} storage, ${og}, ${valLabel})</td><td class="r">${nf(r.defaultValue,2)}</td></tr>`+
+      `<tr><td class="l">Eccs / Eccr — CO₂ capture &amp; storage / replacement</td><td class="r">${nf(r.terms.Eccs,2)}</td></tr>`+
+      `<tr class="tot"><td class="l">TOTAL E</td><td class="r">${nf(r.E,2)}</td></tr>`;
+  } else {
+    const b=r.ep_break;
+    emRows=
+      `<tr><td class="l">E<sub>ec</sub> — Cultivation / extraction of raw material</td><td class="r">${nf(r.terms.Eec,2)}</td></tr>`+
+      `<tr><td class="l">E<sub>l</sub> — Annualised land-use-change emissions</td><td class="r">${nf(r.terms.El,2)}</td></tr>`+
+      `<tr><td class="l">E<sub>p</sub> — Processing</td><td class="r"><b>${nf(r.ep,2)}</b></td></tr>`+
+      `<tr class="sub"><td class="l">&nbsp;&nbsp;• Methane slip (1% of CH₄)</td><td class="r">${nf(b.slip,2)}</td></tr>`+
+      `<tr class="sub"><td class="l">&nbsp;&nbsp;• Electricity demand</td><td class="r">${nf(b.electricity,2)}</td></tr>`+
+      `<tr class="sub"><td class="l">&nbsp;&nbsp;• Heat demand</td><td class="r">${nf(b.heat,2)}</td></tr>`+
+      `<tr class="sub"><td class="l">&nbsp;&nbsp;• Compression / grid injection</td><td class="r">${nf(b.compression,2)}</td></tr>`+
+      `<tr class="sub"><td class="l">&nbsp;&nbsp;• Open digestate storage</td><td class="r">${nf(b.openStorage,2)}</td></tr>`+
+      `<tr><td class="l">E<sub>td</sub> — Transport &amp; distribution</td><td class="r">${nf(r.terms.Etd,2)}</td></tr>`+
+      `<tr><td class="l">E<sub>u</sub> — Use of the fuel</td><td class="r">${nf(r.terms.Eu,2)}</td></tr>`+
+      `<tr><td class="l">E<sub>sca</sub> — Soil carbon / manure-management credit</td><td class="r">${nf(r.terms.Esca,2)}</td></tr>`+
+      `<tr><td class="l">E<sub>ccs</sub> / E<sub>ccr</sub> — CO₂ capture &amp; storage / replacement</td><td class="r">${nf(r.terms.Eccs,2)}</td></tr>`+
+      `<tr class="tot"><td class="l">TOTAL E</td><td class="r">${nf(r.E,2)}</td></tr>`;
+  }
+
+  // RED III default matrix (transparency, default pathway only)
+  let defMatrix="";
+  if(r.pathway==="default"){
+    const opts=[["closed","c","Closed storage · off-gas combusted"],["closed","nc","Closed storage · off-gas not combusted"],
+      ["open","c","Open storage · off-gas combusted"],["open","nc","Open storage · off-gas not combusted"]];
+    const rows=opts.map(o=>{const key=o[0]+"|"+o[1];const v=RED[r.detName][key];const hl=(key===r.defaultKey);
+      return `<tr${hl?' class="hl"':''}><td class="l">${o[2]}${hl?' &nbsp;◀ applied':''}</td><td class="r">${v[0]}</td><td class="r">${v[1]}</td></tr>`;}).join("");
+    defMatrix=`<h3>RED III Annex VI default values — ${esc(r.detName)} <span class="u">(g CO₂eq/MJ)</span></h3>
+      <table class="rep"><thead><tr><th class="l">Configuration</th><th class="r">Typical</th><th class="r">Default</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  // applied emission factors
+  const usedModes=[...new Set(r.per.map(p=>p.mode))];
+  const modeRows=usedModes.map(m=>{const a=MODES[m];return `<tr><td class="l">Road/rail transport — ${esc(m)}</td><td class="r">${nf(a[0]*a[1],4)} kg CO₂eq/t·km</td><td class="l">DeCarbon model parameter</td></tr>`;}).join("");
+  const factorRows=
+    `<tr><td class="l">Lower heating value of methane</td><td class="r">${LHV} MJ/Nm³</td><td class="l">Standard property</td></tr>`+
+    `<tr><td class="l">Methane density (0 °C, 1 atm)</td><td class="r">${CH4_DENS} kg/Nm³</td><td class="l">Standard property</td></tr>`+
+    `<tr><td class="l">Global warming potential of CH₄ (100-yr)</td><td class="r">${GWP_CH4}</td><td class="l">IPCC AR5 (as applied in RED III)</td></tr>`+
+    `<tr><td class="l">Methane slip (unintended release)</td><td class="r">1.0% of CH₄ produced</td><td class="l">RED III Annex VI / ISCC EU 205</td></tr>`+
+    `<tr><td class="l">Specific electricity demand</td><td class="r">${ELEC_SPEC} kWh/Nm³ CH₄</td><td class="l">DeCarbon model parameter</td></tr>`+
+    `<tr><td class="l">Heat demand share of energy output</td><td class="r">${HEAT_PCT*100}%</td><td class="l">DeCarbon model parameter</td></tr>`+
+    `<tr><td class="l">Compression / grid-injection electricity</td><td class="r">${COMPRESS} kWh/Nm³ CH₄ (mandatory from 2026)</td><td class="l">RED III / ISCC EU 205</td></tr>`+
+    `<tr><td class="l">Grid electricity emission factor (Hungary)</td><td class="r">${GRID_EF} kg CO₂eq/kWh</td><td class="l">National grid factor</td></tr>`+
+    `<tr><td class="l">Applied electricity EF (weighted)</td><td class="r">${nf(r.elecEF,4)} kg CO₂eq/kWh</td><td class="l">From energy mix above</td></tr>`+
+    `<tr><td class="l">Applied heat EF (weighted)</td><td class="r">${nf(r.heatEF,4)} kg CO₂eq/MJ</td><td class="l">From energy mix above</td></tr>`+
+    `<tr><td class="l">Manure-management credit (E<sub>sca</sub>)</td><td class="r">−45 g CO₂eq/MJ × manure share</td><td class="l">RED III Annex VI</td></tr>`+
+    `<tr><td class="l">Open digestate storage emissions</td><td class="r">Wet manure 69.56 / Biowaste 21.82 g CO₂eq/MJ</td><td class="l">RED III Annex VI</td></tr>`+
+    `<tr><td class="l">Fossil fuel comparator (E<sub>F</sub>)</td><td class="r">${FOSSIL} g CO₂eq/MJ</td><td class="l">RED III Annex VI</td></tr>`+
+    modeRows;
+
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Biomethane CI Calculator — Report — ${plant} — ${esc(meta.reportId)}</title>
+<style>
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+@page{margin:14mm;}
+body{margin:0;background:#f4f5f5;color:#1A1A1A;font-family:"Helvetica Neue",Arial,"Segoe UI",sans-serif;font-size:12px;line-height:1.5;}
+.page{max-width:820px;margin:0 auto;background:#fff;position:relative;padding:0 30px 40px;}
+.watermark{position:fixed;inset:0;z-index:0;pointer-events:none;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.watermark span{font-size:42px;font-weight:800;color:rgba(20,40,46,.055);transform:rotate(-32deg);white-space:nowrap;letter-spacing:.1em;text-transform:uppercase;}
+.content{position:relative;z-index:1;}
+.toolbar{position:sticky;top:0;background:#13323A;padding:10px 30px;margin:0 -30px 18px;display:flex;justify-content:space-between;align-items:center;z-index:5;}
+.toolbar button{background:#2E7D55;color:#fff;border:0;border-radius:4px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;}
+.toolbar .tt{color:#cfe3d8;font-size:12px;}
+.rhead{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #13323A;padding:18px 0 14px;gap:20px;}
+.rhead .kick{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7c7c7c;font-weight:700;}
+.rhead h1{margin:5px 0 3px;font-size:21px;font-weight:700;}
+.rhead .subt{font-size:12px;color:#7c7c7c;}
+.rhead img{height:34px;}
+.idbar{display:flex;justify-content:space-between;font-size:10.5px;color:#46606A;background:#eef2f3;padding:7px 12px;margin-top:10px;border-radius:3px;}
+.idbar b{color:#13323A;}
+.nontrans{font-size:10.5px;color:#7a4a16;background:#FBF1E3;border:1px solid #E4D2B0;border-radius:3px;padding:7px 12px;margin-top:8px;}
+h2{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#fff;background:#13323A;padding:7px 12px;margin:26px 0 0;border-radius:2px 2px 0 0;}
+h3{font-size:12px;font-weight:700;color:#13323A;margin:18px 0 6px;}
+h3 .u{font-weight:400;color:#7c7c7c;font-size:11px;}
+.sectbody{border:1px solid #E6E6E6;border-top:none;border-radius:0 0 2px 2px;padding:12px 14px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px 26px;}
+.kv{display:flex;justify-content:space-between;border-bottom:1px solid #eef2f3;padding:4px 0;font-size:11.5px;}
+.kv span{color:#7c7c7c;}.kv b{color:#1A1A1A;font-weight:600;}
+.headline{display:flex;gap:14px;margin:14px 0 4px;}
+.hbox{flex:1;border:1px solid #E6E6E6;border-radius:4px;padding:14px;text-align:center;}
+.hbox.dark{background:#13323A;border-color:#13323A;}
+.hbox .hl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#7c7c7c;}
+.hbox.dark .hl{color:#9fb8bf;}
+.hbox .hv{font-size:32px;font-weight:800;line-height:1.1;margin-top:4px;}
+.hbox .hu{font-size:10.5px;color:#7c7c7c;margin-top:2px;}
+.hbox.dark .hu{color:#9fb8bf;}
+.hbox.green .hv{color:#2E7D55;}
+table.rep{border-collapse:collapse;width:100%;font-size:11px;margin-top:4px;}
+table.rep th{background:#13323A;color:#fff;font-size:9.5px;text-transform:uppercase;letter-spacing:.03em;font-weight:600;padding:6px 7px;text-align:left;}
+table.rep th.r{text-align:right;}
+table.rep td{padding:5px 7px;border-bottom:1px solid #eef2f3;vertical-align:top;}
+table.rep td.r{text-align:right;font-variant-numeric:tabular-nums;}
+table.rep td.l{text-align:left;}
+table.rep tr.tot td{font-weight:700;color:#13323A;border-top:1.5px solid #13323A;background:#f7faf8;}
+table.rep tr.sub td{color:#7c7c7c;font-size:10.5px;}
+table.rep tr.hl td{background:#eaf4ee;font-weight:600;}
+.note{font-size:10.5px;color:#7c7c7c;font-style:italic;margin:8px 2px 0;}
+.disc{margin-top:22px;border:1px solid #E4D2B0;background:#FBF1E3;border-radius:4px;padding:12px 14px;font-size:10.5px;color:#7a4a16;}
+.rfoot{margin-top:18px;border-top:1px solid #E6E6E6;padding-top:10px;font-size:10px;color:#7c7c7c;display:flex;justify-content:space-between;}
+@media print{.toolbar{display:none;}body{background:#fff;}.page{max-width:none;padding:0;}}
+</style></head>
+<body>
+<div style="position:sticky;top:0;z-index:200;background:#fff;border-bottom:1px solid #E6E6E6;">
+  <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:10px 20px;gap:16px;">
+    <a href="index.html" target="_top" style="display:flex;align-items:center;text-decoration:none;"><img src="https://cdn.prod.website-files.com/68bd30984b2e2994dfa84953/6a216bcfa4f8e4b053f9f3d0_logo%20al%C3%A1%C3%ADr%C3%A1shoz.png" alt="DeCarbon Energy" style="height:26px;"></a>
+    <div style="display:flex;align-items:center;gap:18px;font-size:13.5px;font-weight:600;">
+      <a href="#how" style="color:#46606A;text-decoration:none;">How it works</a>
+      <a href="index.html#pricing" target="_top" style="color:#46606A;text-decoration:none;">Settings</a>
+      <a href="index.html#pricing" target="_top" style="background:#2E7D55;color:#fff;text-decoration:none;padding:8px 16px;border-radius:5px;">Subscription</a>
+    </div>
+  </div>
+</div>
+<div class="watermark"><span>${wm}</span></div>
+<div class="page"><div class="content">
+  <div class="toolbar no-print"><span class="tt">Use “Save as PDF” as the printer destination.</span><button onclick="window.print()">Print / Save as PDF</button></div>
+
+  <div class="rhead">
+    <div><div class="kick">ISCC EU · RED III · Annex VI</div>
+      <h1>Biomethane GHG Intensity Report</h1>
+      <div class="subt">Greenhouse-gas emission intensity of transport biomethane</div></div>
+    <img src="${LOGO}" alt="DeCarbon Energy">
+  </div>
+  <div class="idbar"><span>Report ID: <b>${esc(meta.reportId)}</b></span><span>Issued: <b>${esc(meta.date)}</b></span><span>Issuer: <b>DeCarbon Energy Kft.</b></span></div>
+  <div class="nontrans"><b>Prepared exclusively for ${plant}.</b> This report is licensed to the named facility only and is <b>not transferable</b>. Reproduction, resale or distribution to third parties is prohibited.</div>
+
+  <h2>1. Facility &amp; scope</h2>
+  <div class="sectbody"><div class="grid2">
+    <div class="kv"><span>Facility / plant</span><b>${plant}</b></div>
+    <div class="kv"><span>Operator</span><b>${esc(meta.operator)}</b></div>
+    <div class="kv"><span>Location</span><b>${esc(meta.location)}</b></div>
+    <div class="kv"><span>Reporting period</span><b>${esc(meta.period)}</b></div>
+    <div class="kv"><span>End use</span><b>${esc(inp.enduse)}</b></div>
+    <div class="kv"><span>Calculation basis</span><b>${pathwayLabel}</b></div>
+    <div class="kv"><span>Detected feedstock</span><b>${esc(r.det)}</b></div>
+    <div class="kv"><span>Value type</span><b>${valLabel}</b></div>
+  </div></div>
+
+  <h2>2. Result</h2>
+  <div class="sectbody">
+    <div class="headline">
+      <div class="hbox dark"><div class="hl">GHG intensity (E)</div><div class="hv" style="color:${r.E<0?'#7CDBA8':'#fff'}">${nf(r.E,1)}</div><div class="hu">g CO₂eq / MJ</div></div>
+      <div class="hbox green"><div class="hl">GHG saving vs fossil</div><div class="hv">${r.totCH4>0?Math.round(r.saving)+"%":"—"}</div><div class="hu">vs ${FOSSIL} g CO₂eq/MJ comparator</div></div>
+      <div class="hbox"><div class="hl">Annual biomethane</div><div class="hv" style="color:#13323A">${nf(r.GWh,1)}</div><div class="hu">GWh / yr</div></div>
+    </div>
+    <div class="note">GHG saving = (E_F − E) / E_F, with the RED III Annex VI fossil comparator E_F = ${FOSSIL} g CO₂eq/MJ. A negative E indicates net carbon removal relative to the comparator.</div>
+  </div>
+
+  <h2>3. Key settings</h2>
+  <div class="sectbody"><div class="grid2">
+    <div class="kv"><span>End use</span><b>${esc(inp.enduse)}</b></div>
+    <div class="kv"><span>Value type</span><b>${valLabel}</b></div>
+    <div class="kv"><span>Digestate storage</span><b>${inp.dig}</b></div>
+    <div class="kv"><span>Upgrading off-gas</span><b>${inp.offgas==="c"?"combusted":"not combusted"}</b></div>
+    <div class="kv"><span>CO₂ capture (e_ccs/e_ccr)</span><b>${inp.ccsMode}</b></div>
+    <div class="kv"><span>CO₂ captured</span><b>${nf(inp.ccsVal,0)} g CO₂eq/MJ</b></div>
+    <div class="kv"><span>Operating hours</span><b>${nf(r.oph,0)} h/yr</b></div>
+    <div class="kv"><span>Avg. thermal output</span><b>${nf(r.avgMW,2)} MW</b></div>
+  </div></div>
+
+  <h2>4. Feedstock inventory &amp; transport</h2>
+  <div class="sectbody">
+    <table class="rep"><thead><tr><th class="l">Substrate</th><th class="r">t/yr</th><th class="r">Biogas m³/t</th><th class="r">CH₄ %</th><th class="r">Biogas m³/yr</th><th class="r">CH₄ m³/yr</th><th class="r">GWh/yr</th><th class="l">Transport mode</th><th class="r">km</th></tr></thead>
+    <tbody>${feedRows}${feedTot}</tbody></table>
+  </div>
+
+  <h2>5. Energy use</h2>
+  <div class="sectbody">
+    <h3 style="margin-top:2px">Electricity <span class="u">(weighted EF ${nf(r.elecEF,4)} kg CO₂eq/kWh)</span></h3>
+    <table class="rep"><thead><tr><th class="l">Source</th><th class="r">Share</th><th class="r">EF (kg/kWh)</th></tr></thead><tbody>${eRows(inp.elecMix)}</tbody></table>
+    <h3>Heat <span class="u">(weighted EF ${nf(r.heatEF,4)} kg CO₂eq/MJ)</span></h3>
+    <table class="rep"><thead><tr><th class="l">Source</th><th class="r">Share</th><th class="r">EF (kg/MJ)</th></tr></thead><tbody>${eRows(inp.heatMix)}</tbody></table>
+  </div>
+
+  <h2>6. Itemized GHG calculation <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10.5px">(RED III Annex VI · g CO₂eq/MJ)</span></h2>
+  <div class="sectbody">
+    <table class="rep"><thead><tr><th class="l">Emission term</th><th class="r">g CO₂eq/MJ</th></tr></thead><tbody>${emRows}</tbody></table>
+    <div class="note">E = E<sub>ec</sub> + E<sub>l</sub> + E<sub>p</sub> + E<sub>td</sub> + E<sub>u</sub> − E<sub>sca</sub> − E<sub>ccs</sub> − E<sub>ccr</sub>. ${r.pathway==="default"?"For a 100% single-feedstock pathway the regulated default value already incorporates E<sub>ec</sub>…E<sub>sca</sub>; only CCS/CCR is applied on top.":"Negative terms (E<sub>sca</sub>, E<sub>ccs</sub>) reduce the intensity."}</div>
+    ${defMatrix}
+  </div>
+
+  <h2>7. Applied emission factors &amp; sources</h2>
+  <div class="sectbody">
+    <table class="rep"><thead><tr><th class="l">Parameter</th><th class="r">Applied value</th><th class="l">Source / basis</th></tr></thead><tbody>${factorRows}</tbody></table>
+    <div class="note">Methodology: Directive (EU) 2023/2413 (RED III) Annex VI; ISCC EU 205 “Greenhouse Gas Emissions”; Commission Implementing Regulation (EU) 2022/996. Parameters marked “DeCarbon model parameter” are engineering assumptions of the DeCarbon model and are subject to verification by the Certification Body.</div>
+  </div>
+
+  <h2>8. Indicative offtake value <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10.5px">(commercial estimate — not part of the GHG certification)</span></h2>
+  <div class="sectbody">
+    <div class="headline">
+      <div class="hbox green"><div class="hl">Green premium</div><div class="hv">${r.totCH4>0?nf(r.premium,1):"—"}</div><div class="hu">€ / MWh</div></div>
+      <div class="hbox"><div class="hl">Indicative offtake price</div><div class="hv" style="color:#13323A">${r.totCH4>0?nf(r.price,1):"—"}</div><div class="hu">€ / MWh</div></div>
+      <div class="hbox dark"><div class="hl">Indicative revenue</div><div class="hv" style="color:#fff">${r.totCH4>0?nf(r.revenue,0):"—"}</div><div class="hu">€ / yr</div></div>
+    </div>
+    <table class="rep"><tbody>
+      <tr><td class="l">TTF base assumption</td><td class="r">${nf(inp.ttf,0)} €/MWh</td></tr>
+      <tr><td class="l">Green premium (derived from GHG intensity)</td><td class="r">${nf(r.premium,1)} €/MWh</td></tr>
+      <tr class="tot"><td class="l">Indicative offtake price</td><td class="r">${nf(r.price,1)} €/MWh</td></tr>
+      <tr><td class="l">Annual biomethane energy</td><td class="r">${nf(r.MWh,0)} MWh/yr</td></tr>
+      <tr class="tot"><td class="l">Indicative annual revenue</td><td class="r">${nf(r.revenue,0)} €/yr</td></tr>
+    </tbody></table>
+    <div class="note">Green premium: 45 €/MWh at E ≥ 0, rising linearly to 95 €/MWh at E = −100 g CO₂eq/MJ. Indicative figures only — actual offtake terms depend on market conditions and bilateral negotiation; not part of the ISCC EU certified value.</div>
+  </div>
+
+  <div class="disc"><b>DISCLAIMER.</b> This report is an indicative engineering calculation produced by the DeCarbon GHG Calculator. It does <b>not</b> replace the ISCC EU audit and is <b>not</b> an official greenhouse-gas calculation. The binding GHG value and the Proof of Sustainability can only be issued through the ISCC EU certification process by an accredited Certification Body. The DeCarbon model computes; the Certification Body audits and approves. Property of DeCarbon Energy Kft.</div>
+
+  <div class="rfoot"><span>© DeCarbon Energy Kft. · ISCC EU Biomethane GHG model</span><span>Report ID ${esc(meta.reportId)} · ${esc(meta.date)} · not transferable</span></div>
+</div></div>
+</body></html>`;
+}
+
+function openReport(){
+  const inp=gatherInputs();
+  if(!inp.feedstocks.length){alert("Please enter at least one feedstock tonnage before generating a report.");return;}
+  const r=calcGHG(inp);
+  const meta=gatherMeta();
+  const html=buildReportHTML(inp,r,meta);
+  const w=window.open("","_blank");
+  if(!w){alert("Please allow pop-ups to open the report.");return;}
+  w.document.open();w.document.write(html);w.document.close();w.focus();
+}
+
+// init
+buildTable(); buildEnergy();
+["enduse","vtype","dig","offgas","ccsmode","ccsval","ophours","ttf"].forEach(id=>document.getElementById(id).addEventListener("input",compute));
+document.getElementById("genReport").addEventListener("click",openReport);
+compute();
+
+// expose pure engine for testing / future server use
+window.DeCarbonGHG={calcGHG,gatherInputs,buildReportHTML};
+
+// report height to parent (responsive iframe embedding in Webflow)
+function reportHeight(){try{var h=document.body.scrollHeight;parent.postMessage({ghgHeight:h},"*");}catch(e){}}
+window.addEventListener("load",reportHeight);
+new ResizeObserver(reportHeight).observe(document.body);
+document.addEventListener('click',function(ev){var a=ev.target.closest?ev.target.closest('a[href^="#"]'):null;if(!a)return;var id=a.getAttribute('href').slice(1);if(!id)return;var el=document.getElementById(id);if(!el)return;ev.preventDefault();var off=el.getBoundingClientRect().top+(window.scrollY||window.pageYOffset||0);try{parent.postMessage({ghgScrollTo:off},'*');}catch(e){}});
+
+</script>
+</body>
+</html>
